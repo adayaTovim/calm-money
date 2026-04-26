@@ -4,13 +4,19 @@ import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { FilterBar, getDateRange } from '../components/ui/FilterBar';
+import type { TimePreset } from '../components/ui/FilterBar';
 import type { Expense } from '../types';
 
 function fmt(n: number) { return '₪' + n.toLocaleString('he-IL', { maximumFractionDigits: 0 }); }
 
 const EDIT_CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment', 'Travel', 'Utilities', 'Taxes', 'Other'];
 
-type SortField = 'date' | 'amount' | 'category' | 'supplier';
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'upcoming', label: 'Upcoming' },
+];
 
 export function ExpensesPage() {
   const navigate = useNavigate();
@@ -20,45 +26,33 @@ export function ExpensesPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Expense>>({});
 
-  const [sortBy, setSortBy] = useState<SortField>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [timePreset, setTimePreset] = useState<TimePreset>('all');
   const [filterCategory, setFilterCategory] = useState('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'upcoming'>('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [search, setSearch] = useState('');
 
-  const categories = useMemo(() => ['all', ...[...new Set(expenses.map((e) => e.category))].sort()], [expenses]);
+  const categories = useMemo(() =>
+    [...new Set(expenses.map((e) => e.category))].sort(),
+    [expenses]
+  );
 
   const startEdit = (exp: Expense) => { setEditId(exp.id); setEditData(exp); };
   const saveEdit = () => { if (editId) updateExpense(editId, editData); setEditId(null); };
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const [field, dir] = e.target.value.split(':');
-    setSortBy(field as SortField);
-    setSortDir(dir as 'asc' | 'desc');
-  };
-
   const filtered = useMemo(() => {
+    const range = getDateRange(timePreset);
     return expenses
       .filter((e) => filterCategory === 'all' || e.category === filterCategory)
       .filter((e) => filterStatus === 'all' || (e.status ?? 'paid') === filterStatus)
-      .filter((e) => !dateFrom || e.date >= dateFrom)
-      .filter((e) => !dateTo || e.date <= dateTo);
-  }, [expenses, filterCategory, filterStatus, dateFrom, dateTo]);
+      .filter((e) => !range || (e.date >= range.from && e.date <= range.to))
+      .filter((e) => !search || (e.supplier || '').toLowerCase().includes(search.toLowerCase()));
+  }, [expenses, filterCategory, filterStatus, timePreset, search]);
 
-  const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
-      let cmp = 0;
-      if (sortBy === 'date') cmp = a.date.localeCompare(b.date);
-      else if (sortBy === 'amount') cmp = a.amount - b.amount;
-      else if (sortBy === 'category') cmp = a.category.localeCompare(b.category);
-      else if (sortBy === 'supplier') cmp = (a.supplier || '').localeCompare(b.supplier || '');
-      return sortDir === 'asc' ? cmp : -cmp;
-    });
-  }, [filtered, sortBy, sortDir]);
-
-  const activeFilters = (filterCategory !== 'all' ? 1 : 0) + (filterStatus !== 'all' ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
-  const clearFilters = () => { setFilterCategory('all'); setFilterStatus('all'); setDateFrom(''); setDateTo(''); };
+  // default sort: date desc
+  const sorted = useMemo(() =>
+    [...filtered].sort((a, b) => b.date.localeCompare(a.date)),
+    [filtered]
+  );
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-4">
@@ -66,10 +60,7 @@ export function ExpensesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Expenses</h1>
-          <p className="text-gray-400 text-sm mt-0.5">
-            {sorted.length} of {expenses.length} entries
-            {activeFilters > 0 && <span className="ml-1 text-calm-blue">· {activeFilters} filter{activeFilters > 1 ? 's' : ''} active</span>}
-          </p>
+          <p className="text-gray-400 text-sm mt-0.5">{sorted.length} of {expenses.length} entries</p>
         </div>
         <button onClick={() => navigate('/expenses/add')}
           className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
@@ -77,66 +68,21 @@ export function ExpensesPage() {
         </button>
       </div>
 
-      {/* Filter + Sort bar */}
+      {/* Filter bar */}
       {expenses.length > 0 && (
-        <Card className="flex flex-wrap items-end gap-4">
-          {/* Category dropdown */}
-          <div className="min-w-[150px]">
-            <label className="block text-xs text-gray-400 mb-1.5">Category</label>
-            <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
-              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
-              {categories.map((c) => (
-                <option key={c} value={c}>{c === 'all' ? 'All categories' : c}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Status */}
-          <div className="min-w-[140px]">
-            <label className="block text-xs text-gray-400 mb-1.5">Status</label>
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
-              <option value="all">All</option>
-              <option value="paid">Paid</option>
-              <option value="upcoming">Upcoming</option>
-            </select>
-          </div>
-
-          {/* Date from */}
-          <div>
-            <label className="block text-xs text-gray-400 mb-1.5">From date</label>
-            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
-          </div>
-
-          {/* Date to */}
-          <div>
-            <label className="block text-xs text-gray-400 mb-1.5">To date</label>
-            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
-          </div>
-
-          {/* Sort */}
-          <div className="min-w-[180px]">
-            <label className="block text-xs text-gray-400 mb-1.5">Sort by</label>
-            <select value={`${sortBy}:${sortDir}`} onChange={handleSortChange}
-              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
-              <option value="date:desc">Date — newest first</option>
-              <option value="date:asc">Date — oldest first</option>
-              <option value="amount:desc">Amount — high to low</option>
-              <option value="amount:asc">Amount — low to high</option>
-              <option value="category:asc">Category — A to Z</option>
-              <option value="supplier:asc">Supplier — A to Z</option>
-            </select>
-          </div>
-
-          {activeFilters > 0 && (
-            <button onClick={clearFilters}
-              className="px-3 py-2 rounded-lg text-xs font-medium text-calm-red border border-calm-red/30 hover:bg-calm-red-light transition-colors self-end">
-              Clear filters
-            </button>
-          )}
-        </Card>
+        <FilterBar
+          categories={categories}
+          filterCategory={filterCategory}
+          onCategoryChange={setFilterCategory}
+          timePreset={timePreset}
+          onTimeChange={setTimePreset}
+          statusOptions={STATUS_OPTIONS}
+          filterStatus={filterStatus}
+          onStatusChange={setFilterStatus}
+          searchPlaceholder="Search supplier..."
+          searchValue={search}
+          onSearchChange={setSearch}
+        />
       )}
 
       {/* Empty state */}
@@ -153,7 +99,6 @@ export function ExpensesPage() {
       {expenses.length > 0 && sorted.length === 0 && (
         <Card className="text-center py-8">
           <p className="text-gray-400">No entries match your filters.</p>
-          <button onClick={clearFilters} className="mt-2 text-sm text-calm-blue hover:underline">Clear filters</button>
         </Card>
       )}
 

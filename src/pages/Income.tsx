@@ -4,13 +4,19 @@ import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { FilterBar, getDateRange } from '../components/ui/FilterBar';
+import type { TimePreset } from '../components/ui/FilterBar';
 import type { Income } from '../types';
 
 function fmt(n: number) {
   return '₪' + n.toLocaleString('he-IL', { maximumFractionDigits: 0 });
 }
 
-type SortField = 'date' | 'amount' | 'source' | 'status';
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'received', label: 'Received' },
+  { value: 'pending', label: 'Pending' },
+];
 
 export function IncomePage() {
   const navigate = useNavigate();
@@ -20,41 +26,26 @@ export function IncomePage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Income>>({});
 
-  const [sortBy, setSortBy] = useState<SortField>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'received' | 'pending'>('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [timePreset, setTimePreset] = useState<TimePreset>('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [search, setSearch] = useState('');
 
   const startEdit = (inc: Income) => { setEditId(inc.id); setEditData(inc); };
   const saveEdit = () => { if (editId) updateIncome(editId, editData); setEditId(null); };
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const [field, dir] = e.target.value.split(':');
-    setSortBy(field as SortField);
-    setSortDir(dir as 'asc' | 'desc');
-  };
-
   const filtered = useMemo(() => {
+    const range = getDateRange(timePreset);
     return incomes
       .filter((i) => filterStatus === 'all' || i.status === filterStatus)
-      .filter((i) => !dateFrom || i.date >= dateFrom)
-      .filter((i) => !dateTo || i.date <= dateTo);
-  }, [incomes, filterStatus, dateFrom, dateTo]);
+      .filter((i) => !range || (i.date >= range.from && i.date <= range.to))
+      .filter((i) => !search || (i.source || '').toLowerCase().includes(search.toLowerCase()));
+  }, [incomes, filterStatus, timePreset, search]);
 
-  const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
-      let cmp = 0;
-      if (sortBy === 'date') cmp = a.date.localeCompare(b.date);
-      else if (sortBy === 'amount') cmp = a.amount - b.amount;
-      else if (sortBy === 'source') cmp = (a.source || '').localeCompare(b.source || '');
-      else if (sortBy === 'status') cmp = a.status.localeCompare(b.status);
-      return sortDir === 'asc' ? cmp : -cmp;
-    });
-  }, [filtered, sortBy, sortDir]);
-
-  const activeFilters = (filterStatus !== 'all' ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
-  const clearFilters = () => { setFilterStatus('all'); setDateFrom(''); setDateTo(''); };
+  // default sort: date desc
+  const sorted = useMemo(() =>
+    [...filtered].sort((a, b) => b.date.localeCompare(a.date)),
+    [filtered]
+  );
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-4">
@@ -62,10 +53,7 @@ export function IncomePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Income</h1>
-          <p className="text-gray-400 text-sm mt-0.5">
-            {sorted.length} of {incomes.length} entries
-            {activeFilters > 0 && <span className="ml-1 text-calm-blue">· {activeFilters} filter{activeFilters > 1 ? 's' : ''} active</span>}
-          </p>
+          <p className="text-gray-400 text-sm mt-0.5">{sorted.length} of {incomes.length} entries</p>
         </div>
         <button onClick={() => navigate('/income/add')}
           className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
@@ -73,55 +61,18 @@ export function IncomePage() {
         </button>
       </div>
 
-      {/* Filter + Sort bar */}
+      {/* Filter bar */}
       {incomes.length > 0 && (
-        <Card className="flex flex-wrap items-end gap-4">
-          {/* Status */}
-          <div className="min-w-[140px]">
-            <label className="block text-xs text-gray-400 mb-1.5">Status</label>
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
-              <option value="all">All</option>
-              <option value="received">Received</option>
-              <option value="pending">Pending</option>
-            </select>
-          </div>
-
-          {/* Date from */}
-          <div>
-            <label className="block text-xs text-gray-400 mb-1.5">From date</label>
-            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
-          </div>
-
-          {/* Date to */}
-          <div>
-            <label className="block text-xs text-gray-400 mb-1.5">To date</label>
-            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
-          </div>
-
-          {/* Sort */}
-          <div className="min-w-[160px]">
-            <label className="block text-xs text-gray-400 mb-1.5">Sort by</label>
-            <select value={`${sortBy}:${sortDir}`} onChange={handleSortChange}
-              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
-              <option value="date:desc">Date — newest first</option>
-              <option value="date:asc">Date — oldest first</option>
-              <option value="amount:desc">Amount — high to low</option>
-              <option value="amount:asc">Amount — low to high</option>
-              <option value="source:asc">Source — A to Z</option>
-              <option value="status:asc">Status</option>
-            </select>
-          </div>
-
-          {activeFilters > 0 && (
-            <button onClick={clearFilters}
-              className="px-3 py-2 rounded-lg text-xs font-medium text-calm-red border border-calm-red/30 hover:bg-calm-red-light transition-colors self-end">
-              Clear filters
-            </button>
-          )}
-        </Card>
+        <FilterBar
+          timePreset={timePreset}
+          onTimeChange={setTimePreset}
+          statusOptions={STATUS_OPTIONS}
+          filterStatus={filterStatus}
+          onStatusChange={setFilterStatus}
+          searchPlaceholder="Search source..."
+          searchValue={search}
+          onSearchChange={setSearch}
+        />
       )}
 
       {/* Empty state */}
@@ -138,7 +89,6 @@ export function IncomePage() {
       {incomes.length > 0 && sorted.length === 0 && (
         <Card className="text-center py-8">
           <p className="text-gray-400">No entries match your filters.</p>
-          <button onClick={clearFilters} className="mt-2 text-sm text-calm-blue hover:underline">Clear filters</button>
         </Card>
       )}
 
