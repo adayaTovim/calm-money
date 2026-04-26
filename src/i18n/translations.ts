@@ -138,6 +138,7 @@ const translations = {
     clear_data_desc: 'This will permanently delete all your income, expenses, and tasks. This cannot be undone.',
     clear_confirm: 'Yes, delete everything',
     cancel: 'Cancel',
+    delete_confirm: 'Delete',
     language: 'Language',
 
     // Upload
@@ -331,6 +332,7 @@ const translations = {
     clear_data_desc: 'פעולה זו תמחק לצמיתות את כל ההכנסות, ההוצאות והמשימות שלך. לא ניתן לבטל.',
     clear_confirm: 'כן, מחק הכל',
     cancel: 'ביטול',
+    delete_confirm: 'מחק',
     language: 'שפה',
 
     // Upload

@@ -21,6 +21,7 @@ export function IncomePage() {
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Income>>({});
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const [timePreset, setTimePreset] = useState<TimePreset>('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -145,9 +146,24 @@ export function IncomePage() {
                 </div>
                 <p className="text-sm text-gray-400 truncate">{inc.source || '—'} · {inc.date}</p>
               </div>
-              <div className="flex gap-1 shrink-0">
-                <button onClick={() => startEdit(inc)} className="p-2 hover:bg-beige-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"><Pencil size={15} /></button>
-                <button onClick={() => deleteIncome(inc.id)} className="p-2 hover:bg-calm-red-light rounded-lg text-gray-400 hover:text-calm-red transition-colors"><Trash2 size={15} /></button>
+              <div className="flex gap-1 shrink-0 items-center">
+                {confirmDeleteId === inc.id ? (
+                  <>
+                    <button onClick={() => { deleteIncome(inc.id); setConfirmDeleteId(null); }}
+                      className="px-2.5 py-1.5 bg-calm-red text-white rounded-lg text-xs font-medium">
+                      {t.delete_confirm}
+                    </button>
+                    <button onClick={() => setConfirmDeleteId(null)}
+                      className="px-2.5 py-1.5 border border-beige-200 text-gray-400 rounded-lg text-xs">
+                      {t.cancel}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => startEdit(inc)} className="p-2 hover:bg-beige-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"><Pencil size={15} /></button>
+                    <button onClick={() => setConfirmDeleteId(inc.id)} className="p-2 hover:bg-calm-red-light rounded-lg text-gray-400 hover:text-calm-red transition-colors"><Trash2 size={15} /></button>
+                  </>
+                )}
               </div>
             </Card>
           )
