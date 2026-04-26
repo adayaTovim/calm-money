@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Lightbulb,
-  Bell, ListChecks, Settings, Leaf,
+  Bell, ListChecks, Settings, Scale,
 } from 'lucide-react';
 import { useT } from '../../i18n/useT';
 
@@ -25,7 +25,7 @@ export function Sidebar() {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-56 shrink-0 bg-white border-e border-beige-200 flex-col min-h-screen">
         <div className="p-5 flex items-center gap-2 border-b border-beige-200">
-          <Leaf className="text-calm-green" size={22} />
+          <Scale className="text-calm-blue" size={22} />
           <span className="font-semibold text-gray-800 text-lg">Calm Money</span>
         </div>
         <nav className="flex-1 p-3 space-y-1">

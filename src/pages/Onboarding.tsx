@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Leaf, ArrowRight } from 'lucide-react';
+import { Scale, ArrowRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useT } from '../i18n/useT';
 import type { Lang } from '../i18n/translations';
@@ -30,8 +30,8 @@ export function Onboarding() {
         </div>
 
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-calm-green-light rounded-2xl flex items-center justify-center">
-            <Leaf size={32} className="text-calm-green" />
+          <div className="w-16 h-16 bg-calm-blue-light rounded-2xl flex items-center justify-center">
+            <Scale size={32} className="text-calm-blue" />
           </div>
         </div>
 
