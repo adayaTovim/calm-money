@@ -23,7 +23,7 @@ export function generateInsights(data: InsightInput): InsightRule[] {
       observation: 'Your expenses exceed your income this period.',
       action: 'Stop non-critical spending immediately and review your largest expense categories.',
     });
-  } else if (totalExpenses > totalIncome && freeMoney >= 0) {
+  } else if (totalExpenses > totalIncome) {
     results.push({
       id: 'overspending',
       type: 'danger',
@@ -33,7 +33,7 @@ export function generateInsights(data: InsightInput): InsightRule[] {
     });
   }
 
-  if (freeMoney >= 0 && freeMoneyPct < 0.1 && freeMoney >= 0) {
+  if (freeMoney >= 0 && freeMoneyPct < 0.1) {
     results.push({
       id: 'low-margin',
       type: 'warning',

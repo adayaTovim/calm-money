@@ -20,8 +20,7 @@ const STATUS_OPTIONS = [
 
 export function ExpensesPage() {
   const navigate = useNavigate();
-  const { filteredExpenses, deleteExpense, updateExpense } = useStore();
-  const expenses = filteredExpenses();
+  const { expenses, deleteExpense, updateExpense } = useStore();
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Expense>>({});

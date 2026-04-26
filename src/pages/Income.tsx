@@ -20,8 +20,7 @@ const STATUS_OPTIONS = [
 
 export function IncomePage() {
   const navigate = useNavigate();
-  const { filteredIncomes, deleteIncome, updateIncome } = useStore();
-  const incomes = filteredIncomes();
+  const { incomes, deleteIncome, updateIncome } = useStore();
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Income>>({});

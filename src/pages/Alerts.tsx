@@ -12,9 +12,8 @@ interface Alert {
 }
 
 export function AlertsPage() {
-  const { filteredIncomes, totalIncome, totalExpenses, freeMoney, pendingIncome } = useStore();
+  const { filteredIncomes, totalIncome, freeMoney, pendingIncome } = useStore();
   const income = totalIncome();
-  const expenses = totalExpenses();
   const free = freeMoney();
   const pending = pendingIncome();
   const incomes = filteredIncomes();
@@ -33,7 +32,9 @@ export function AlertsPage() {
     }
 
     const overdueCount = incomes.filter((i) => {
-      const daysAgo = (Date.now() - new Date(i.date).getTime()) / 86400000;
+      const ms = new Date(i.date).getTime();
+      if (isNaN(ms)) return false;
+      const daysAgo = (Date.now() - ms) / 86400000;
       return i.status === 'pending' && daysAgo > 30;
     }).length;
 
@@ -50,7 +51,7 @@ export function AlertsPage() {
     }
 
     return list;
-  }, [income, expenses, free, pending, incomes]);
+  }, [income, free, pending, incomes]);
 
   const styles = {
     danger: { bg: 'bg-calm-red-light border-calm-red/20', icon: 'text-calm-red' },
