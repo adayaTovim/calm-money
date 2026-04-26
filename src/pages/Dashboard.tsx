@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Wallet, Clock, Plus, Upload } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Clock, Plus, Upload, Scale } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { generateInsights, calcHealthScore } from '../utils/insights';
@@ -83,7 +83,11 @@ export function Dashboard() {
       {/* Empty state */}
       {!hasData && (
         <Card className="text-center py-10 md:py-12">
-          <p className="text-3xl mb-3">🌿</p>
+          <div className="flex justify-center mb-4">
+            <div className="w-14 h-14 bg-calm-blue-light rounded-2xl flex items-center justify-center">
+              <Scale size={28} className="text-calm-blue" />
+            </div>
+          </div>
           <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-2">{t.empty_title}</h2>
           <p className="text-gray-400 text-sm mb-6">{t.empty_desc}</p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
