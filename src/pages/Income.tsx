@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Check, X, ArrowUpDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X, ArrowUpDown, SlidersHorizontal } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -24,24 +24,37 @@ export function IncomePage() {
   const navigate = useNavigate();
   const { filteredIncomes, deleteIncome, updateIncome } = useStore();
   const incomes = filteredIncomes();
+
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Income>>({});
   const [sortBy, setSortBy] = useState<SortField>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
+  // Filters
+  const [filterStatus, setFilterStatus] = useState<'all' | 'received' | 'pending'>('all');
+  const [filterSource, setFilterSource] = useState('all');
+
+  const sources = useMemo(() => {
+    const s = [...new Set(incomes.map((i) => i.source).filter(Boolean))];
+    return s;
+  }, [incomes]);
+
   const startEdit = (inc: Income) => { setEditId(inc.id); setEditData(inc); };
-  const saveEdit = () => {
-    if (editId) updateIncome(editId, editData);
-    setEditId(null);
-  };
+  const saveEdit = () => { if (editId) updateIncome(editId, editData); setEditId(null); };
 
   const toggleSort = (field: SortField) => {
     if (sortBy === field) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     else { setSortBy(field); setSortDir('asc'); }
   };
 
+  const filtered = useMemo(() => {
+    return incomes
+      .filter((i) => filterStatus === 'all' || i.status === filterStatus)
+      .filter((i) => filterSource === 'all' || i.source === filterSource);
+  }, [incomes, filterStatus, filterSource]);
+
   const sorted = useMemo(() => {
-    return [...incomes].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       let cmp = 0;
       if (sortBy === 'date') cmp = a.date.localeCompare(b.date);
       else if (sortBy === 'source') cmp = (a.source || '').localeCompare(b.source || '');
@@ -49,14 +62,19 @@ export function IncomePage() {
       else if (sortBy === 'amount') cmp = a.amount - b.amount;
       return sortDir === 'asc' ? cmp : -cmp;
     });
-  }, [incomes, sortBy, sortDir]);
+  }, [filtered, sortBy, sortDir]);
+
+  const activeFilters = (filterStatus !== 'all' ? 1 : 0) + (filterSource !== 'all' ? 1 : 0);
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Income</h1>
-          <p className="text-gray-400 text-sm mt-0.5">{incomes.length} entries</p>
+          <p className="text-gray-400 text-sm mt-0.5">
+            {sorted.length} of {incomes.length} entries
+            {activeFilters > 0 && <span className="ml-1 text-calm-blue">· {activeFilters} filter{activeFilters > 1 ? 's' : ''} active</span>}
+          </p>
         </div>
         <button onClick={() => navigate('/income/add')}
           className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
@@ -64,21 +82,82 @@ export function IncomePage() {
         </button>
       </div>
 
-      {/* Sort bar */}
-      {incomes.length > 1 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs text-gray-400 flex items-center gap-1"><ArrowUpDown size={12} /> Sort by:</span>
-          {SORT_OPTIONS.map(({ value, label }) => (
-            <button key={value} onClick={() => toggleSort(value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                sortBy === value
-                  ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
-                  : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-              }`}>
-              {label} {sortBy === value ? (sortDir === 'asc' ? '↑' : '↓') : ''}
-            </button>
-          ))}
-        </div>
+      {incomes.length > 0 && (
+        <Card className="space-y-4">
+          {/* Filters */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-2">
+              <SlidersHorizontal size={12} /> Filter
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <div>
+                <p className="text-xs text-gray-400 mb-1.5">Status</p>
+                <div className="flex gap-1.5">
+                  {(['all', 'received', 'pending'] as const).map((s) => (
+                    <button key={s} onClick={() => setFilterStatus(s)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                        filterStatus === s
+                          ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
+                          : 'border-beige-200 text-gray-400 hover:bg-beige-100'
+                      }`}>
+                      {s === 'all' ? 'All' : s === 'received' ? '✓ Received' : '⏳ Pending'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {sources.length > 0 && (
+                <div>
+                  <p className="text-xs text-gray-400 mb-1.5">Source</p>
+                  <div className="flex gap-1.5 flex-wrap">
+                    <button onClick={() => setFilterSource('all')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                        filterSource === 'all' ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
+                      }`}>
+                      All
+                    </button>
+                    {sources.map((s) => (
+                      <button key={s} onClick={() => setFilterSource(s)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                          filterSource === s ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
+                        }`}>
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeFilters > 0 && (
+                <div className="flex items-end">
+                  <button onClick={() => { setFilterStatus('all'); setFilterSource('all'); }}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-calm-red border border-calm-red/30 hover:bg-calm-red-light transition-colors">
+                    Clear filters
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sort */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-2">
+              <ArrowUpDown size={12} /> Sort
+            </p>
+            <div className="flex gap-1.5 flex-wrap">
+              {SORT_OPTIONS.map(({ value, label }) => (
+                <button key={value} onClick={() => toggleSort(value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                    sortBy === value
+                      ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
+                      : 'border-beige-200 text-gray-400 hover:bg-beige-100'
+                  }`}>
+                  {label} {sortBy === value ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Card>
       )}
 
       {incomes.length === 0 && (
@@ -88,6 +167,14 @@ export function IncomePage() {
             className="flex items-center gap-2 mx-auto bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
             <Plus size={16} /> Add your first income
           </button>
+        </Card>
+      )}
+
+      {incomes.length > 0 && sorted.length === 0 && (
+        <Card className="text-center py-8">
+          <p className="text-gray-400">No entries match your filters.</p>
+          <button onClick={() => { setFilterStatus('all'); setFilterSource('all'); }}
+            className="mt-3 text-sm text-calm-blue hover:underline">Clear filters</button>
         </Card>
       )}
 
