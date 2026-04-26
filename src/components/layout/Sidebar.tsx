@@ -18,7 +18,13 @@ export function Sidebar() {
     { to: '/settings', icon: Settings, label: t.settings },
   ];
 
-  const mobileLinks = links.slice(0, 5);
+  const mobileLinks = [
+    links[0], // Dashboard
+    links[1], // Income
+    links[2], // Expenses
+    links[3], // Insights
+    links[6], // Settings
+  ];
 
   return (
     <>
