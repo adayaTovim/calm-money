@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Check, X, ArrowUpDown, SlidersHorizontal } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -10,15 +10,7 @@ function fmt(n: number) {
   return '₪' + n.toLocaleString('he-IL', { maximumFractionDigits: 0 });
 }
 
-type SortField = 'date' | 'source' | 'status' | 'amount';
-type SortDir = 'asc' | 'desc';
-
-const SORT_OPTIONS: { value: SortField; label: string }[] = [
-  { value: 'date', label: 'Date' },
-  { value: 'source', label: 'Source' },
-  { value: 'status', label: 'Paid / Pending' },
-  { value: 'amount', label: 'Amount' },
-];
+type SortField = 'date' | 'amount' | 'source' | 'status';
 
 export function IncomePage() {
   const navigate = useNavigate();
@@ -27,47 +19,46 @@ export function IncomePage() {
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Income>>({});
+
   const [sortBy, setSortBy] = useState<SortField>('date');
-  const [sortDir, setSortDir] = useState<SortDir>('desc');
-
-  // Filters
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [filterStatus, setFilterStatus] = useState<'all' | 'received' | 'pending'>('all');
-  const [filterSource, setFilterSource] = useState('all');
-
-  const sources = useMemo(() => {
-    const s = [...new Set(incomes.map((i) => i.source).filter(Boolean))];
-    return s;
-  }, [incomes]);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const startEdit = (inc: Income) => { setEditId(inc.id); setEditData(inc); };
   const saveEdit = () => { if (editId) updateIncome(editId, editData); setEditId(null); };
 
-  const toggleSort = (field: SortField) => {
-    if (sortBy === field) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    else { setSortBy(field); setSortDir('asc'); }
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const [field, dir] = e.target.value.split(':');
+    setSortBy(field as SortField);
+    setSortDir(dir as 'asc' | 'desc');
   };
 
   const filtered = useMemo(() => {
     return incomes
       .filter((i) => filterStatus === 'all' || i.status === filterStatus)
-      .filter((i) => filterSource === 'all' || i.source === filterSource);
-  }, [incomes, filterStatus, filterSource]);
+      .filter((i) => !dateFrom || i.date >= dateFrom)
+      .filter((i) => !dateTo || i.date <= dateTo);
+  }, [incomes, filterStatus, dateFrom, dateTo]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
       let cmp = 0;
       if (sortBy === 'date') cmp = a.date.localeCompare(b.date);
+      else if (sortBy === 'amount') cmp = a.amount - b.amount;
       else if (sortBy === 'source') cmp = (a.source || '').localeCompare(b.source || '');
       else if (sortBy === 'status') cmp = a.status.localeCompare(b.status);
-      else if (sortBy === 'amount') cmp = a.amount - b.amount;
       return sortDir === 'asc' ? cmp : -cmp;
     });
   }, [filtered, sortBy, sortDir]);
 
-  const activeFilters = (filterStatus !== 'all' ? 1 : 0) + (filterSource !== 'all' ? 1 : 0);
+  const activeFilters = (filterStatus !== 'all' ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
+  const clearFilters = () => { setFilterStatus('all'); setDateFrom(''); setDateTo(''); };
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Income</h1>
@@ -82,84 +73,58 @@ export function IncomePage() {
         </button>
       </div>
 
+      {/* Filter + Sort bar */}
       {incomes.length > 0 && (
-        <Card className="space-y-4">
-          {/* Filters */}
+        <Card className="flex flex-wrap items-end gap-4">
+          {/* Status */}
+          <div className="min-w-[140px]">
+            <label className="block text-xs text-gray-400 mb-1.5">Status</label>
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
+              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
+              <option value="all">All</option>
+              <option value="received">Received</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+
+          {/* Date from */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-2">
-              <SlidersHorizontal size={12} /> Filter
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <div>
-                <p className="text-xs text-gray-400 mb-1.5">Status</p>
-                <div className="flex gap-1.5">
-                  {(['all', 'received', 'pending'] as const).map((s) => (
-                    <button key={s} onClick={() => setFilterStatus(s)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                        filterStatus === s
-                          ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
-                          : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                      }`}>
-                      {s === 'all' ? 'All' : s === 'received' ? '✓ Received' : '⏳ Pending'}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <label className="block text-xs text-gray-400 mb-1.5">From date</label>
+            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+              className="border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
+          </div>
 
-              {sources.length > 0 && (
-                <div>
-                  <p className="text-xs text-gray-400 mb-1.5">Source</p>
-                  <div className="flex gap-1.5 flex-wrap">
-                    <button onClick={() => setFilterSource('all')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                        filterSource === 'all' ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                      }`}>
-                      All
-                    </button>
-                    {sources.map((s) => (
-                      <button key={s} onClick={() => setFilterSource(s)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                          filterSource === s ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                        }`}>
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeFilters > 0 && (
-                <div className="flex items-end">
-                  <button onClick={() => { setFilterStatus('all'); setFilterSource('all'); }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-calm-red border border-calm-red/30 hover:bg-calm-red-light transition-colors">
-                    Clear filters
-                  </button>
-                </div>
-              )}
-            </div>
+          {/* Date to */}
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5">To date</label>
+            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+              className="border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
           </div>
 
           {/* Sort */}
-          <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-2">
-              <ArrowUpDown size={12} /> Sort
-            </p>
-            <div className="flex gap-1.5 flex-wrap">
-              {SORT_OPTIONS.map(({ value, label }) => (
-                <button key={value} onClick={() => toggleSort(value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                    sortBy === value
-                      ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
-                      : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                  }`}>
-                  {label} {sortBy === value ? (sortDir === 'asc' ? '↑' : '↓') : ''}
-                </button>
-              ))}
-            </div>
+          <div className="min-w-[160px]">
+            <label className="block text-xs text-gray-400 mb-1.5">Sort by</label>
+            <select value={`${sortBy}:${sortDir}`} onChange={handleSortChange}
+              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
+              <option value="date:desc">Date — newest first</option>
+              <option value="date:asc">Date — oldest first</option>
+              <option value="amount:desc">Amount — high to low</option>
+              <option value="amount:asc">Amount — low to high</option>
+              <option value="source:asc">Source — A to Z</option>
+              <option value="status:asc">Status</option>
+            </select>
           </div>
+
+          {activeFilters > 0 && (
+            <button onClick={clearFilters}
+              className="px-3 py-2 rounded-lg text-xs font-medium text-calm-red border border-calm-red/30 hover:bg-calm-red-light transition-colors self-end">
+              Clear filters
+            </button>
+          )}
         </Card>
       )}
 
+      {/* Empty state */}
       {incomes.length === 0 && (
         <Card className="text-center py-10">
           <p className="text-gray-400 mb-4">No income entries yet.</p>
@@ -173,11 +138,11 @@ export function IncomePage() {
       {incomes.length > 0 && sorted.length === 0 && (
         <Card className="text-center py-8">
           <p className="text-gray-400">No entries match your filters.</p>
-          <button onClick={() => { setFilterStatus('all'); setFilterSource('all'); }}
-            className="mt-3 text-sm text-calm-blue hover:underline">Clear filters</button>
+          <button onClick={clearFilters} className="mt-2 text-sm text-calm-blue hover:underline">Clear filters</button>
         </Card>
       )}
 
+      {/* List */}
       <div className="space-y-2">
         {sorted.map((inc) =>
           editId === inc.id ? (
@@ -185,22 +150,26 @@ export function IncomePage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-gray-400">Amount (₪)</label>
-                  <input type="number" value={editData.amount} onChange={(e) => setEditData((d) => ({ ...d, amount: +e.target.value }))}
+                  <input type="number" value={editData.amount}
+                    onChange={(e) => setEditData((d) => ({ ...d, amount: +e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
                   <label className="text-xs text-gray-400">Source</label>
-                  <input value={editData.source} onChange={(e) => setEditData((d) => ({ ...d, source: e.target.value }))}
+                  <input value={editData.source}
+                    onChange={(e) => setEditData((d) => ({ ...d, source: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
                   <label className="text-xs text-gray-400">Date</label>
-                  <input type="date" value={editData.date} onChange={(e) => setEditData((d) => ({ ...d, date: e.target.value }))}
+                  <input type="date" value={editData.date}
+                    onChange={(e) => setEditData((d) => ({ ...d, date: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
                   <label className="text-xs text-gray-400">Status</label>
-                  <select value={editData.status} onChange={(e) => setEditData((d) => ({ ...d, status: e.target.value as Income['status'] }))}
+                  <select value={editData.status}
+                    onChange={(e) => setEditData((d) => ({ ...d, status: e.target.value as Income['status'] }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
                     <option value="received">Received</option>
                     <option value="pending">Pending</option>

@@ -59,6 +59,7 @@ export function parseExcelFile(file: File): Promise<ParsedExcelData> {
                 category: String(get(['category', 'קטגוריה', 'type', 'סוג']) || 'General'),
                 supplier: String(get(['supplier', 'ספק', 'vendor', 'description', 'תיאור']) || ''),
                 date: toDateStr(get(['date', 'תאריך'])),
+                status: 'paid',
                 notes: String(get(['notes', 'הערות']) || ''),
               });
             }

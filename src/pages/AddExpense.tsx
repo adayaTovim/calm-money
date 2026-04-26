@@ -8,7 +8,7 @@ import type { Expense } from '../types';
 const CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment', 'Travel', 'Utilities', 'Taxes', 'Other'];
 
 const EMPTY: Omit<Expense, 'id'> = {
-  amount: 0, category: 'Other', supplier: '', date: new Date().toISOString().slice(0, 10), notes: '',
+  amount: 0, category: 'Other', supplier: '', date: new Date().toISOString().slice(0, 10), status: 'paid', notes: '',
 };
 
 export function AddExpense() {
@@ -80,6 +80,22 @@ export function AddExpense() {
           <label className="block text-sm font-medium text-gray-600 mb-1">Date</label>
           <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)}
             className="w-full border border-beige-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-2">Status</label>
+          <div className="flex gap-3">
+            {(['paid', 'upcoming'] as const).map((s) => (
+              <button key={s} onClick={() => set('status', s)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                  form.status === s
+                    ? s === 'paid' ? 'bg-calm-green-light border-calm-green text-calm-green' : 'bg-calm-amber-light border-calm-amber text-calm-amber'
+                    : 'border-beige-200 text-gray-400 hover:bg-beige-50'
+                }`}>
+                {s === 'paid' ? '✓ Paid' : '⏳ Upcoming'}
+              </button>
+            ))}
+          </div>
         </div>
 
         {error && <p className="text-sm text-calm-red">{error}</p>}

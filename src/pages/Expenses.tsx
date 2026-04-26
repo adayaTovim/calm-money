@@ -1,23 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Check, X, ArrowUpDown, SlidersHorizontal } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
 import type { Expense } from '../types';
 
 function fmt(n: number) { return '₪' + n.toLocaleString('he-IL', { maximumFractionDigits: 0 }); }
 
 const EDIT_CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment', 'Travel', 'Utilities', 'Taxes', 'Other'];
 
-type SortField = 'date' | 'category' | 'amount' | 'supplier';
-type SortDir = 'asc' | 'desc';
-
-const SORT_OPTIONS: { value: SortField; label: string }[] = [
-  { value: 'date', label: 'Date' },
-  { value: 'category', label: 'Category' },
-  { value: 'amount', label: 'Amount' },
-  { value: 'supplier', label: 'Supplier' },
-];
+type SortField = 'date' | 'amount' | 'category' | 'supplier';
 
 export function ExpensesPage() {
   const navigate = useNavigate();
@@ -26,45 +19,50 @@ export function ExpensesPage() {
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Expense>>({});
+
   const [sortBy, setSortBy] = useState<SortField>('date');
-  const [sortDir, setSortDir] = useState<SortDir>('desc');
-
-  // Filters
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [filterCategory, setFilterCategory] = useState('all');
-  const [filterSupplier, setFilterSupplier] = useState('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'upcoming'>('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
-  const categories = useMemo(() => [...new Set(expenses.map((e) => e.category))].sort(), [expenses]);
-  const suppliers = useMemo(() => [...new Set(expenses.map((e) => e.supplier).filter(Boolean))].sort() as string[], [expenses]);
+  const categories = useMemo(() => ['all', ...[...new Set(expenses.map((e) => e.category))].sort()], [expenses]);
 
   const startEdit = (exp: Expense) => { setEditId(exp.id); setEditData(exp); };
   const saveEdit = () => { if (editId) updateExpense(editId, editData); setEditId(null); };
 
-  const toggleSort = (field: SortField) => {
-    if (sortBy === field) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    else { setSortBy(field); setSortDir('asc'); }
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const [field, dir] = e.target.value.split(':');
+    setSortBy(field as SortField);
+    setSortDir(dir as 'asc' | 'desc');
   };
 
   const filtered = useMemo(() => {
     return expenses
       .filter((e) => filterCategory === 'all' || e.category === filterCategory)
-      .filter((e) => filterSupplier === 'all' || e.supplier === filterSupplier);
-  }, [expenses, filterCategory, filterSupplier]);
+      .filter((e) => filterStatus === 'all' || (e.status ?? 'paid') === filterStatus)
+      .filter((e) => !dateFrom || e.date >= dateFrom)
+      .filter((e) => !dateTo || e.date <= dateTo);
+  }, [expenses, filterCategory, filterStatus, dateFrom, dateTo]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
       let cmp = 0;
       if (sortBy === 'date') cmp = a.date.localeCompare(b.date);
-      else if (sortBy === 'category') cmp = a.category.localeCompare(b.category);
       else if (sortBy === 'amount') cmp = a.amount - b.amount;
+      else if (sortBy === 'category') cmp = a.category.localeCompare(b.category);
       else if (sortBy === 'supplier') cmp = (a.supplier || '').localeCompare(b.supplier || '');
       return sortDir === 'asc' ? cmp : -cmp;
     });
   }, [filtered, sortBy, sortDir]);
 
-  const activeFilters = (filterCategory !== 'all' ? 1 : 0) + (filterSupplier !== 'all' ? 1 : 0);
+  const activeFilters = (filterCategory !== 'all' ? 1 : 0) + (filterStatus !== 'all' ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
+  const clearFilters = () => { setFilterCategory('all'); setFilterStatus('all'); setDateFrom(''); setDateTo(''); };
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Expenses</h1>
@@ -79,88 +77,69 @@ export function ExpensesPage() {
         </button>
       </div>
 
+      {/* Filter + Sort bar */}
       {expenses.length > 0 && (
-        <Card className="space-y-4">
-          {/* Filters */}
+        <Card className="flex flex-wrap items-end gap-4">
+          {/* Category dropdown */}
+          <div className="min-w-[150px]">
+            <label className="block text-xs text-gray-400 mb-1.5">Category</label>
+            <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
+              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
+              {categories.map((c) => (
+                <option key={c} value={c}>{c === 'all' ? 'All categories' : c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status */}
+          <div className="min-w-[140px]">
+            <label className="block text-xs text-gray-400 mb-1.5">Status</label>
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
+              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
+              <option value="all">All</option>
+              <option value="paid">Paid</option>
+              <option value="upcoming">Upcoming</option>
+            </select>
+          </div>
+
+          {/* Date from */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-2">
-              <SlidersHorizontal size={12} /> Filter
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <div>
-                <p className="text-xs text-gray-400 mb-1.5">Category</p>
-                <div className="flex gap-1.5 flex-wrap">
-                  <button onClick={() => setFilterCategory('all')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                      filterCategory === 'all' ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                    }`}>
-                    All
-                  </button>
-                  {categories.map((c) => (
-                    <button key={c} onClick={() => setFilterCategory(c)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                        filterCategory === c ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                      }`}>
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <label className="block text-xs text-gray-400 mb-1.5">From date</label>
+            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+              className="border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
+          </div>
 
-              {suppliers.length > 0 && (
-                <div>
-                  <p className="text-xs text-gray-400 mb-1.5">Supplier</p>
-                  <div className="flex gap-1.5 flex-wrap">
-                    <button onClick={() => setFilterSupplier('all')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                        filterSupplier === 'all' ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                      }`}>
-                      All
-                    </button>
-                    {suppliers.map((s) => (
-                      <button key={s} onClick={() => setFilterSupplier(s)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                          filterSupplier === s ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                        }`}>
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeFilters > 0 && (
-                <div className="flex items-end">
-                  <button onClick={() => { setFilterCategory('all'); setFilterSupplier('all'); }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-calm-red border border-calm-red/30 hover:bg-calm-red-light transition-colors">
-                    Clear filters
-                  </button>
-                </div>
-              )}
-            </div>
+          {/* Date to */}
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5">To date</label>
+            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+              className="border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
           </div>
 
           {/* Sort */}
-          <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-1 mb-2">
-              <ArrowUpDown size={12} /> Sort
-            </p>
-            <div className="flex gap-1.5 flex-wrap">
-              {SORT_OPTIONS.map(({ value, label }) => (
-                <button key={value} onClick={() => toggleSort(value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                    sortBy === value
-                      ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
-                      : 'border-beige-200 text-gray-400 hover:bg-beige-100'
-                  }`}>
-                  {label} {sortBy === value ? (sortDir === 'asc' ? '↑' : '↓') : ''}
-                </button>
-              ))}
-            </div>
+          <div className="min-w-[180px]">
+            <label className="block text-xs text-gray-400 mb-1.5">Sort by</label>
+            <select value={`${sortBy}:${sortDir}`} onChange={handleSortChange}
+              className="w-full border border-beige-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-calm-blue/30">
+              <option value="date:desc">Date — newest first</option>
+              <option value="date:asc">Date — oldest first</option>
+              <option value="amount:desc">Amount — high to low</option>
+              <option value="amount:asc">Amount — low to high</option>
+              <option value="category:asc">Category — A to Z</option>
+              <option value="supplier:asc">Supplier — A to Z</option>
+            </select>
           </div>
+
+          {activeFilters > 0 && (
+            <button onClick={clearFilters}
+              className="px-3 py-2 rounded-lg text-xs font-medium text-calm-red border border-calm-red/30 hover:bg-calm-red-light transition-colors self-end">
+              Clear filters
+            </button>
+          )}
         </Card>
       )}
 
+      {/* Empty state */}
       {expenses.length === 0 && (
         <Card className="text-center py-10">
           <p className="text-gray-400 mb-4">No expense entries yet.</p>
@@ -174,11 +153,11 @@ export function ExpensesPage() {
       {expenses.length > 0 && sorted.length === 0 && (
         <Card className="text-center py-8">
           <p className="text-gray-400">No entries match your filters.</p>
-          <button onClick={() => { setFilterCategory('all'); setFilterSupplier('all'); }}
-            className="mt-3 text-sm text-calm-blue hover:underline">Clear filters</button>
+          <button onClick={clearFilters} className="mt-2 text-sm text-calm-blue hover:underline">Clear filters</button>
         </Card>
       )}
 
+      {/* List */}
       <div className="space-y-2">
         {sorted.map((exp) =>
           editId === exp.id ? (
@@ -186,25 +165,38 @@ export function ExpensesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-gray-400">Amount (₪)</label>
-                  <input type="number" value={editData.amount} onChange={(e) => setEditData((d) => ({ ...d, amount: +e.target.value }))}
+                  <input type="number" value={editData.amount}
+                    onChange={(e) => setEditData((d) => ({ ...d, amount: +e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
                   <label className="text-xs text-gray-400">Category</label>
-                  <select value={editData.category} onChange={(e) => setEditData((d) => ({ ...d, category: e.target.value }))}
+                  <select value={editData.category}
+                    onChange={(e) => setEditData((d) => ({ ...d, category: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
                     {EDIT_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-xs text-gray-400">Supplier</label>
-                  <input value={editData.supplier || ''} onChange={(e) => setEditData((d) => ({ ...d, supplier: e.target.value }))}
+                  <input value={editData.supplier || ''}
+                    onChange={(e) => setEditData((d) => ({ ...d, supplier: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
                   <label className="text-xs text-gray-400">Date</label>
-                  <input type="date" value={editData.date} onChange={(e) => setEditData((d) => ({ ...d, date: e.target.value }))}
+                  <input type="date" value={editData.date}
+                    onChange={(e) => setEditData((d) => ({ ...d, date: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400">Status</label>
+                  <select value={editData.status ?? 'paid'}
+                    onChange={(e) => setEditData((d) => ({ ...d, status: e.target.value as Expense['status'] }))}
+                    className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
+                    <option value="paid">Paid</option>
+                    <option value="upcoming">Upcoming</option>
+                  </select>
                 </div>
               </div>
               <div className="flex gap-2 mt-3">
@@ -218,6 +210,9 @@ export function ExpensesPage() {
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="font-semibold text-gray-800">{fmt(exp.amount)}</span>
                   <span className="text-xs bg-beige-100 text-gray-500 px-2 py-0.5 rounded-full">{exp.category}</span>
+                  <Badge type={(exp.status ?? 'paid') === 'paid' ? 'success' : 'warning'}>
+                    {(exp.status ?? 'paid') === 'paid' ? 'Paid' : 'Upcoming'}
+                  </Badge>
                 </div>
                 <p className="text-sm text-gray-400 truncate">{exp.supplier || '—'} · {exp.date}</p>
               </div>

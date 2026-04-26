@@ -10,12 +10,15 @@ export interface Income {
   notes?: string;
 }
 
+export type ExpenseStatus = 'paid' | 'upcoming';
+
 export interface Expense {
   id: string;
   amount: number;
   category: string;
   supplier?: string;
   date: string;
+  status: ExpenseStatus;
   notes?: string;
 }
 
