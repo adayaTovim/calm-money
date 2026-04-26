@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X, ArrowUpDown } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -10,12 +10,24 @@ function fmt(n: number) {
   return '₪' + n.toLocaleString('he-IL', { maximumFractionDigits: 0 });
 }
 
+type SortField = 'date' | 'source' | 'status' | 'amount';
+type SortDir = 'asc' | 'desc';
+
+const SORT_OPTIONS: { value: SortField; label: string }[] = [
+  { value: 'date', label: 'Date' },
+  { value: 'source', label: 'Source' },
+  { value: 'status', label: 'Paid / Pending' },
+  { value: 'amount', label: 'Amount' },
+];
+
 export function IncomePage() {
   const navigate = useNavigate();
   const { filteredIncomes, deleteIncome, updateIncome } = useStore();
   const incomes = filteredIncomes();
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Income>>({});
+  const [sortBy, setSortBy] = useState<SortField>('date');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   const startEdit = (inc: Income) => { setEditId(inc.id); setEditData(inc); };
   const saveEdit = () => {
@@ -23,18 +35,51 @@ export function IncomePage() {
     setEditId(null);
   };
 
+  const toggleSort = (field: SortField) => {
+    if (sortBy === field) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortBy(field); setSortDir('asc'); }
+  };
+
+  const sorted = useMemo(() => {
+    return [...incomes].sort((a, b) => {
+      let cmp = 0;
+      if (sortBy === 'date') cmp = a.date.localeCompare(b.date);
+      else if (sortBy === 'source') cmp = (a.source || '').localeCompare(b.source || '');
+      else if (sortBy === 'status') cmp = a.status.localeCompare(b.status);
+      else if (sortBy === 'amount') cmp = a.amount - b.amount;
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [incomes, sortBy, sortDir]);
+
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Income</h1>
-          <p className="text-gray-400 text-sm mt-0.5">All your income entries</p>
+          <p className="text-gray-400 text-sm mt-0.5">{incomes.length} entries</p>
         </div>
         <button onClick={() => navigate('/income/add')}
           className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
           <Plus size={16} /> Add income
         </button>
       </div>
+
+      {/* Sort bar */}
+      {incomes.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-gray-400 flex items-center gap-1"><ArrowUpDown size={12} /> Sort by:</span>
+          {SORT_OPTIONS.map(({ value, label }) => (
+            <button key={value} onClick={() => toggleSort(value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                sortBy === value
+                  ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
+                  : 'border-beige-200 text-gray-400 hover:bg-beige-100'
+              }`}>
+              {label} {sortBy === value ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+            </button>
+          ))}
+        </div>
+      )}
 
       {incomes.length === 0 && (
         <Card className="text-center py-10">
@@ -47,7 +92,7 @@ export function IncomePage() {
       )}
 
       <div className="space-y-2">
-        {incomes.map((inc) =>
+        {sorted.map((inc) =>
           editId === inc.id ? (
             <Card key={inc.id}>
               <div className="grid grid-cols-2 gap-3">

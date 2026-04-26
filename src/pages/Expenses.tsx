@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X, ArrowUpDown } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import type { Expense } from '../types';
@@ -9,28 +9,73 @@ function fmt(n: number) { return '₪' + n.toLocaleString('he-IL', { maximumFrac
 
 const CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment', 'Travel', 'Utilities', 'Taxes', 'Other'];
 
+type SortField = 'date' | 'category' | 'amount' | 'supplier';
+type SortDir = 'asc' | 'desc';
+
+const SORT_OPTIONS: { value: SortField; label: string }[] = [
+  { value: 'date', label: 'Date' },
+  { value: 'category', label: 'Category' },
+  { value: 'amount', label: 'Amount' },
+  { value: 'supplier', label: 'Supplier' },
+];
+
 export function ExpensesPage() {
   const navigate = useNavigate();
   const { filteredExpenses, deleteExpense, updateExpense } = useStore();
   const expenses = filteredExpenses();
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Expense>>({});
+  const [sortBy, setSortBy] = useState<SortField>('date');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   const startEdit = (exp: Expense) => { setEditId(exp.id); setEditData(exp); };
   const saveEdit = () => { if (editId) updateExpense(editId, editData); setEditId(null); };
+
+  const toggleSort = (field: SortField) => {
+    if (sortBy === field) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortBy(field); setSortDir('asc'); }
+  };
+
+  const sorted = useMemo(() => {
+    return [...expenses].sort((a, b) => {
+      let cmp = 0;
+      if (sortBy === 'date') cmp = a.date.localeCompare(b.date);
+      else if (sortBy === 'category') cmp = a.category.localeCompare(b.category);
+      else if (sortBy === 'amount') cmp = a.amount - b.amount;
+      else if (sortBy === 'supplier') cmp = (a.supplier || '').localeCompare(b.supplier || '');
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [expenses, sortBy, sortDir]);
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Expenses</h1>
-          <p className="text-gray-400 text-sm mt-0.5">All your expense entries</p>
+          <p className="text-gray-400 text-sm mt-0.5">{expenses.length} entries</p>
         </div>
         <button onClick={() => navigate('/expenses/add')}
           className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
           <Plus size={16} /> Add expense
         </button>
       </div>
+
+      {/* Sort bar */}
+      {expenses.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-gray-400 flex items-center gap-1"><ArrowUpDown size={12} /> Sort by:</span>
+          {SORT_OPTIONS.map(({ value, label }) => (
+            <button key={value} onClick={() => toggleSort(value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                sortBy === value
+                  ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
+                  : 'border-beige-200 text-gray-400 hover:bg-beige-100'
+              }`}>
+              {label} {sortBy === value ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+            </button>
+          ))}
+        </div>
+      )}
 
       {expenses.length === 0 && (
         <Card className="text-center py-10">
@@ -43,7 +88,7 @@ export function ExpensesPage() {
       )}
 
       <div className="space-y-2">
-        {expenses.map((exp) =>
+        {sorted.map((exp) =>
           editId === exp.id ? (
             <Card key={exp.id}>
               <div className="grid grid-cols-2 gap-3">
