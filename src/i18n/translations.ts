@@ -139,6 +139,8 @@ const translations = {
     clear_confirm: 'Yes, delete everything',
     cancel: 'Cancel',
     delete_confirm: 'Delete',
+    delete_this_only: 'Delete this only',
+    delete_all_recurring: 'Delete all recurring',
     language: 'Language',
 
     // Upload
@@ -333,6 +335,8 @@ const translations = {
     clear_confirm: 'כן, מחק הכל',
     cancel: 'ביטול',
     delete_confirm: 'מחק',
+    delete_this_only: 'מחק רק את זה',
+    delete_all_recurring: 'מחק את כל החוזרים',
     language: 'שפה',
 
     // Upload

@@ -16,10 +16,12 @@ interface StoreState {
   addIncome: (income: Omit<Income, 'id'>) => void;
   updateIncome: (id: string, income: Partial<Income>) => void;
   deleteIncome: (id: string) => void;
+  deleteIncomeGroup: (groupId: string) => void;
 
   addExpense: (expense: Omit<Expense, 'id'>) => void;
   updateExpense: (id: string, expense: Partial<Expense>) => void;
   deleteExpense: (id: string) => void;
+  deleteExpenseGroup: (groupId: string) => void;
 
   addTask: (text: string, insightId?: string) => void;
   toggleTask: (id: string) => void;
@@ -60,6 +62,8 @@ export const useStore = create<StoreState>()(
         set((s) => ({ incomes: s.incomes.map((i) => (i.id === id ? { ...i, ...income } : i)) })),
       deleteIncome: (id) =>
         set((s) => ({ incomes: s.incomes.filter((i) => i.id !== id) })),
+      deleteIncomeGroup: (groupId) =>
+        set((s) => ({ incomes: s.incomes.filter((i) => i.recurringGroupId !== groupId) })),
 
       addExpense: (expense) =>
         set((s) => ({ expenses: [...s.expenses, { ...expense, id: uid() }] })),
@@ -67,6 +71,8 @@ export const useStore = create<StoreState>()(
         set((s) => ({ expenses: s.expenses.map((e) => (e.id === id ? { ...e, ...expense } : e)) })),
       deleteExpense: (id) =>
         set((s) => ({ expenses: s.expenses.filter((e) => e.id !== id) })),
+      deleteExpenseGroup: (groupId) =>
+        set((s) => ({ expenses: s.expenses.filter((e) => e.recurringGroupId !== groupId) })),
 
       addTask: (text, insightId) =>
         set((s) => ({

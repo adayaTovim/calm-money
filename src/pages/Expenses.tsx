@@ -16,7 +16,7 @@ const EDIT_CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment
 
 export function ExpensesPage() {
   const navigate = useNavigate();
-  const { expenses, deleteExpense, updateExpense } = useStore();
+  const { expenses, deleteExpense, deleteExpenseGroup, updateExpense } = useStore();
   const t = useT();
 
   const [editId, setEditId] = useState<string | null>(null);
@@ -167,16 +167,29 @@ export function ExpensesPage() {
               </div>
               <div className="flex gap-1 shrink-0 items-center">
                 {confirmDeleteId === exp.id ? (
-                  <>
-                    <button onClick={() => { deleteExpense(exp.id); setConfirmDeleteId(null); }}
-                      className="px-2.5 py-1.5 bg-calm-red text-white rounded-lg text-xs font-medium">
-                      {t.delete_confirm}
-                    </button>
+                  <div className="flex flex-wrap gap-1 items-center">
+                    {exp.recurringGroupId ? (
+                      <>
+                        <button onClick={() => { deleteExpense(exp.id); setConfirmDeleteId(null); }}
+                          className="px-2.5 py-1.5 bg-calm-amber text-white rounded-lg text-xs font-medium whitespace-nowrap">
+                          {t.delete_this_only}
+                        </button>
+                        <button onClick={() => { deleteExpenseGroup(exp.recurringGroupId!); setConfirmDeleteId(null); }}
+                          className="px-2.5 py-1.5 bg-calm-red text-white rounded-lg text-xs font-medium whitespace-nowrap">
+                          {t.delete_all_recurring}
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => { deleteExpense(exp.id); setConfirmDeleteId(null); }}
+                        className="px-2.5 py-1.5 bg-calm-red text-white rounded-lg text-xs font-medium">
+                        {t.delete_confirm}
+                      </button>
+                    )}
                     <button onClick={() => setConfirmDeleteId(null)}
                       className="px-2.5 py-1.5 border border-beige-200 text-gray-400 rounded-lg text-xs">
                       {t.cancel}
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <>
                     <button onClick={() => startEdit(exp)} className="p-2 hover:bg-beige-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"><Pencil size={15} /></button>
