@@ -94,6 +94,16 @@ export const useStore = create<StoreState>()(
       freeMoney: () => get().totalIncome() - get().totalExpenses(),
       pendingIncome: () => get().filteredIncomes().filter((i) => i.status === 'pending').reduce((s, i) => s + i.amount, 0),
     }),
-    { name: 'calm-money-store' }
+    {
+      name: 'calm-money-store',
+      // dateFrom/dateTo are NOT persisted — always reset to current month on load
+      partialize: (state) => ({
+        incomes: state.incomes,
+        expenses: state.expenses,
+        tasks: state.tasks,
+        onboardingDone: state.onboardingDone,
+        language: state.language,
+      }),
+    }
   )
 );
