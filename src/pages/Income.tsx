@@ -7,20 +7,17 @@ import { Badge } from '../components/ui/Badge';
 import { FilterBar, getDateRange } from '../components/ui/FilterBar';
 import type { TimePreset } from '../components/ui/FilterBar';
 import type { Income } from '../types';
+import { useT } from '../i18n/useT';
 
 function fmt(n: number) {
   return '₪' + n.toLocaleString('he-IL', { maximumFractionDigits: 0 });
 }
 
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'All statuses' },
-  { value: 'received', label: 'Received' },
-  { value: 'pending', label: 'Pending' },
-];
 
 export function IncomePage() {
   const navigate = useNavigate();
   const { incomes, deleteIncome, updateIncome } = useStore();
+  const t = useT();
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Income>>({});
@@ -51,12 +48,12 @@ export function IncomePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Income</h1>
-          <p className="text-gray-400 text-sm mt-0.5">{sorted.length} of {incomes.length} entries</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t.income_title}</h1>
+          <p className="text-gray-400 text-sm mt-0.5">{t.entries_of(sorted.length, incomes.length)}</p>
         </div>
         <button onClick={() => navigate('/income/add')}
           className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
-          <Plus size={16} /> Add income
+          <Plus size={16} /> {t.add_income}
         </button>
       </div>
 
@@ -65,10 +62,14 @@ export function IncomePage() {
         <FilterBar
           timePreset={timePreset}
           onTimeChange={setTimePreset}
-          statusOptions={STATUS_OPTIONS}
+          statusOptions={[
+            { value: 'all', label: t.all_statuses },
+            { value: 'received', label: t.received },
+            { value: 'pending', label: t.pending_status },
+          ]}
           filterStatus={filterStatus}
           onStatusChange={setFilterStatus}
-          searchPlaceholder="Search source..."
+          searchPlaceholder={t.search_source}
           searchValue={search}
           onSearchChange={setSearch}
         />

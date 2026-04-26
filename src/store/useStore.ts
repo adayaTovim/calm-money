@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Income, Expense, Task } from '../types';
+import type { Lang } from '../i18n/translations';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 
 interface StoreState {
@@ -10,6 +11,7 @@ interface StoreState {
   dateFrom: string;
   dateTo: string;
   onboardingDone: boolean;
+  language: Lang;
 
   addIncome: (income: Omit<Income, 'id'>) => void;
   updateIncome: (id: string, income: Partial<Income>) => void;
@@ -25,6 +27,7 @@ interface StoreState {
 
   setDateRange: (from: string, to: string) => void;
   setOnboardingDone: () => void;
+  setLanguage: (lang: Lang) => void;
 
   filteredIncomes: () => Income[];
   filteredExpenses: () => Expense[];
@@ -49,6 +52,7 @@ export const useStore = create<StoreState>()(
       dateFrom: defaultFrom,
       dateTo: defaultTo,
       onboardingDone: false,
+      language: 'en',
 
       addIncome: (income) =>
         set((s) => ({ incomes: [...s.incomes, { ...income, id: uid() }] })),
@@ -75,6 +79,7 @@ export const useStore = create<StoreState>()(
 
       setDateRange: (from, to) => set({ dateFrom: from, dateTo: to }),
       setOnboardingDone: () => set({ onboardingDone: true }),
+      setLanguage: (lang) => set({ language: lang }),
 
       filteredIncomes: () => {
         const { incomes, dateFrom, dateTo } = get();

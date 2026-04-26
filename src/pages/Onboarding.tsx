@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { Leaf, ArrowRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { useT } from '../i18n/useT';
+import type { Lang } from '../i18n/translations';
 
 export function Onboarding() {
-  const setOnboardingDone = useStore((s) => s.setOnboardingDone);
+  const { setOnboardingDone, language, setLanguage } = useStore();
+  const t = useT();
   const navigate = useNavigate();
 
   const handleStart = () => {
@@ -14,23 +17,33 @@ export function Onboarding() {
   return (
     <div className="min-h-screen bg-beige-50 flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
+        {/* Language picker */}
+        <div className="flex justify-center gap-2 mb-6">
+          {(['en', 'he'] as Lang[]).map((lang) => (
+            <button key={lang} onClick={() => setLanguage(lang)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                language === lang ? 'bg-calm-blue text-white border-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-100'
+              }`}>
+              {lang === 'en' ? '🇺🇸 EN' : '🇮🇱 HE'}
+            </button>
+          ))}
+        </div>
+
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-calm-green-light rounded-2xl flex items-center justify-center">
             <Leaf size={32} className="text-calm-green" />
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-800 mb-3">Calm Money</h1>
-        <p className="text-gray-500 text-lg mb-2">Your calm financial assistant</p>
-        <p className="text-gray-400 text-sm mb-10">
-          Built for Israeli small business owners who want to understand their finances — simply and without stress.
-        </p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-3">{t.onboarding_title}</h1>
+        <p className="text-gray-500 text-lg mb-2">{t.onboarding_sub}</p>
+        <p className="text-gray-400 text-sm mb-10">{t.onboarding_desc}</p>
 
-        <div className="bg-white rounded-2xl border border-beige-200 p-6 mb-6 text-left space-y-4">
+        <div className="bg-white rounded-2xl border border-beige-200 p-6 mb-6 text-start space-y-4">
           {[
-            { emoji: '📊', title: 'See your free money instantly', desc: 'Know exactly what you can spend this month.' },
-            { emoji: '💡', title: 'Smart insights', desc: 'Get clear actions based on your real numbers.' },
-            { emoji: '✅', title: 'Simple input', desc: 'Add income and expenses in seconds. Always editable.' },
+            { emoji: '📊', title: t.onboarding_f1_title, desc: t.onboarding_f1_desc },
+            { emoji: '💡', title: t.onboarding_f2_title, desc: t.onboarding_f2_desc },
+            { emoji: '✅', title: t.onboarding_f3_title, desc: t.onboarding_f3_desc },
           ].map(({ emoji, title, desc }) => (
             <div key={title} className="flex gap-3">
               <span className="text-2xl">{emoji}</span>
@@ -42,13 +55,11 @@ export function Onboarding() {
           ))}
         </div>
 
-        <button
-          onClick={handleStart}
-          className="w-full flex items-center justify-center gap-2 bg-calm-blue text-white py-3.5 rounded-xl font-medium hover:bg-blue-600 transition-colors"
-        >
-          Get started <ArrowRight size={18} />
+        <button onClick={handleStart}
+          className="w-full flex items-center justify-center gap-2 bg-calm-blue text-white py-3.5 rounded-xl font-medium hover:bg-blue-600 transition-colors">
+          {t.onboarding_cta} <ArrowRight size={18} className="rtl:rotate-180" />
         </button>
-        <p className="text-xs text-gray-400 mt-3">All data stays on your device. No accounts required.</p>
+        <p className="text-xs text-gray-400 mt-3">{t.onboarding_privacy}</p>
       </div>
     </div>
   );

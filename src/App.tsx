@@ -40,9 +40,12 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const language = useStore((s) => s.language);
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <div dir={language === 'he' ? 'rtl' : 'ltr'} className="min-h-screen">
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </div>
   );
 }

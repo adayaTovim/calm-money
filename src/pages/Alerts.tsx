@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { AlertTriangle, Clock, TrendingDown, Info } from 'lucide-react';
+import { useT } from '../i18n/useT';
 
 interface Alert {
   id: string;
@@ -13,6 +14,7 @@ interface Alert {
 
 export function AlertsPage() {
   const { filteredIncomes, totalIncome, freeMoney, pendingIncome } = useStore();
+  const t = useT();
   const income = totalIncome();
   const free = freeMoney();
   const pending = pendingIncome();
@@ -24,11 +26,11 @@ export function AlertsPage() {
     const pendingPct = (income + pending) > 0 ? pending / (income + pending) : 0;
 
     if (free < 0) {
-      list.push({ id: 'deficit', type: 'danger', icon: TrendingDown, title: 'Deficit Risk', message: `Your expenses exceed income by ₪${Math.abs(free).toLocaleString()}. Immediate action recommended.` });
+      list.push({ id: 'deficit', type: 'danger', icon: TrendingDown, title: t.alert_deficit_title, message: t.alert_deficit(Math.abs(free).toLocaleString()) });
     }
 
     if (freeMoneyPct >= 0 && freeMoneyPct < 0.1 && income > 0) {
-      list.push({ id: 'low-margin', type: 'warning', icon: AlertTriangle, title: 'Low Free Money', message: `Only ${Math.round(freeMoneyPct * 100)}% of income remains free. Avoid non-essential spending.` });
+      list.push({ id: 'low-margin', type: 'warning', icon: AlertTriangle, title: t.alert_low_margin_title, message: t.alert_low_margin(Math.round(freeMoneyPct * 100)) });
     }
 
     const overdueCount = incomes.filter((i) => {
@@ -39,19 +41,19 @@ export function AlertsPage() {
     }).length;
 
     if (overdueCount > 0) {
-      list.push({ id: 'overdue', type: 'warning', icon: Clock, title: 'Delayed Payments', message: `${overdueCount} pending income ${overdueCount === 1 ? 'entry is' : 'entries are'} over 30 days old. Follow up with your clients.` });
+      list.push({ id: 'overdue', type: 'warning', icon: Clock, title: t.alert_overdue_title, message: t.alert_overdue(overdueCount) });
     }
 
     if (pendingPct > 0.5) {
-      list.push({ id: 'pending-heavy', type: 'warning', icon: Clock, title: 'High Pending Income', message: `${Math.round(pendingPct * 100)}% of expected income is still unpaid. This affects your cash flow.` });
+      list.push({ id: 'pending-heavy', type: 'warning', icon: Clock, title: t.alert_pending_heavy_title, message: t.alert_pending_heavy(Math.round(pendingPct * 100)) });
     }
 
     if (list.length === 0) {
-      list.push({ id: 'all-good', type: 'info', icon: Info, title: 'All looks good', message: 'No critical alerts at the moment. Keep it up!' });
+      list.push({ id: 'all-good', type: 'info', icon: Info, title: t.alert_good_title, message: t.alert_good });
     }
 
     return list;
-  }, [income, free, pending, incomes]);
+  }, [income, free, pending, incomes, t]);
 
   const styles = {
     danger: { bg: 'bg-calm-red-light border-calm-red/20', icon: 'text-calm-red' },
@@ -60,10 +62,10 @@ export function AlertsPage() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-4">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Alerts</h1>
-        <p className="text-gray-400 text-sm mt-0.5">Things that need your attention</p>
+        <h1 className="text-2xl font-bold text-gray-800">{t.alerts_title}</h1>
+        <p className="text-gray-400 text-sm mt-0.5">{t.alerts_sub}</p>
       </div>
       {alerts.map((a) => {
         const s = styles[a.type];

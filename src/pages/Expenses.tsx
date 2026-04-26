@@ -7,20 +7,17 @@ import { Badge } from '../components/ui/Badge';
 import { FilterBar, getDateRange } from '../components/ui/FilterBar';
 import type { TimePreset } from '../components/ui/FilterBar';
 import type { Expense } from '../types';
+import { useT } from '../i18n/useT';
 
 function fmt(n: number) { return '₪' + n.toLocaleString('he-IL', { maximumFractionDigits: 0 }); }
 
 const EDIT_CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment', 'Travel', 'Utilities', 'Taxes', 'Other'];
 
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'All statuses' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'upcoming', label: 'Upcoming' },
-];
 
 export function ExpensesPage() {
   const navigate = useNavigate();
   const { expenses, deleteExpense, updateExpense } = useStore();
+  const t = useT();
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Expense>>({});
@@ -75,10 +72,14 @@ export function ExpensesPage() {
           onCategoryChange={setFilterCategory}
           timePreset={timePreset}
           onTimeChange={setTimePreset}
-          statusOptions={STATUS_OPTIONS}
+          statusOptions={[
+            { value: 'all', label: t.all_statuses },
+            { value: 'paid', label: t.paid },
+            { value: 'upcoming', label: t.upcoming },
+          ]}
           filterStatus={filterStatus}
           onStatusChange={setFilterStatus}
-          searchPlaceholder="Search supplier..."
+          searchPlaceholder={t.search_supplier}
           searchValue={search}
           onSearchChange={setSearch}
         />

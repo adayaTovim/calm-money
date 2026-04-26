@@ -3,25 +3,27 @@ import {
   LayoutDashboard, TrendingUp, TrendingDown, Lightbulb,
   Bell, ListChecks, Settings, Leaf,
 } from 'lucide-react';
-
-const links = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/income', icon: TrendingUp, label: 'Income' },
-  { to: '/expenses', icon: TrendingDown, label: 'Expenses' },
-  { to: '/insights', icon: Lightbulb, label: 'Insights' },
-  { to: '/tasks', icon: ListChecks, label: 'Tasks' },
-  { to: '/alerts', icon: Bell, label: 'Alerts' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
-];
-
-// Bottom 5 links shown on mobile nav bar
-const mobileLinks = links.slice(0, 5);
+import { useT } from '../../i18n/useT';
 
 export function Sidebar() {
+  const t = useT();
+
+  const links = [
+    { to: '/', icon: LayoutDashboard, label: t.dashboard },
+    { to: '/income', icon: TrendingUp, label: t.income },
+    { to: '/expenses', icon: TrendingDown, label: t.expenses },
+    { to: '/insights', icon: Lightbulb, label: t.insights },
+    { to: '/tasks', icon: ListChecks, label: t.tasks },
+    { to: '/alerts', icon: Bell, label: t.alerts },
+    { to: '/settings', icon: Settings, label: t.settings },
+  ];
+
+  const mobileLinks = links.slice(0, 5);
+
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 shrink-0 bg-white border-r border-beige-200 flex-col min-h-screen">
+      <aside className="hidden md:flex w-56 shrink-0 bg-white border-e border-beige-200 flex-col min-h-screen">
         <div className="p-5 flex items-center gap-2 border-b border-beige-200">
           <Leaf className="text-calm-green" size={22} />
           <span className="font-semibold text-gray-800 text-lg">Calm Money</span>
@@ -46,12 +48,12 @@ export function Sidebar() {
           ))}
         </nav>
         <div className="p-4 text-xs text-gray-400 border-t border-beige-200">
-          Your finances, calmly.
+          {t.tagline}
         </div>
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 flex items-center justify-around px-2 py-1 safe-area-pb">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 flex items-center justify-around px-2 py-1">
         {mobileLinks.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
