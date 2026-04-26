@@ -14,35 +14,60 @@ const links = [
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
+// Bottom 5 links shown on mobile nav bar
+const mobileLinks = links.slice(0, 5);
+
 export function Sidebar() {
   return (
-    <aside className="w-56 shrink-0 bg-white border-r border-beige-200 flex flex-col min-h-screen">
-      <div className="p-5 flex items-center gap-2 border-b border-beige-200">
-        <Leaf className="text-calm-green" size={22} />
-        <span className="font-semibold text-gray-800 text-lg">Calm Money</span>
-      </div>
-      <nav className="flex-1 p-3 space-y-1">
-        {links.map(({ to, icon: Icon, label }) => (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-56 shrink-0 bg-white border-r border-beige-200 flex-col min-h-screen">
+        <div className="p-5 flex items-center gap-2 border-b border-beige-200">
+          <Leaf className="text-calm-green" size={22} />
+          <span className="font-semibold text-gray-800 text-lg">Calm Money</span>
+        </div>
+        <nav className="flex-1 p-3 space-y-1">
+          {links.map(({ to, icon: Icon, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-calm-blue-light text-calm-blue'
+                    : 'text-gray-500 hover:bg-beige-100 hover:text-gray-700'
+                }`
+              }
+            >
+              <Icon size={18} />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="p-4 text-xs text-gray-400 border-t border-beige-200">
+          Your finances, calmly.
+        </div>
+      </aside>
+
+      {/* Mobile bottom nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 flex items-center justify-around px-2 py-1 safe-area-pb">
+        {mobileLinks.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-calm-blue-light text-calm-blue'
-                  : 'text-gray-500 hover:bg-beige-100 hover:text-gray-700'
+              `flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-colors ${
+                isActive ? 'text-calm-blue' : 'text-gray-400'
               }`
             }
           >
-            <Icon size={18} />
-            {label}
+            <Icon size={20} />
+            <span className="text-[10px] font-medium">{label}</span>
           </NavLink>
         ))}
       </nav>
-      <div className="p-4 text-xs text-gray-400 border-t border-beige-200">
-        Your finances, calmly.
-      </div>
-    </aside>
+    </>
   );
 }

@@ -76,7 +76,7 @@ export function FilterBar({
   searchPlaceholder = 'Search...', searchValue, onSearchChange,
 }: FilterBarProps) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap w-full">
       {/* Category — expenses only */}
       {categories && onCategoryChange && (
         <PillSelect
@@ -104,14 +104,14 @@ export function FilterBar({
       />
 
       {/* Search — pushed to the right */}
-      <div className="ml-auto relative">
+      <div className="relative w-full sm:w-auto sm:ml-auto">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="bg-white border border-beige-200 rounded-full pl-9 pr-4 py-2.5 text-sm text-gray-600 shadow-sm w-52 focus:outline-none focus:border-calm-blue focus:ring-2 focus:ring-calm-blue/20 transition-colors placeholder:text-gray-300"
+          className="bg-white border border-beige-200 rounded-full pl-9 pr-4 py-2.5 text-sm text-gray-600 shadow-sm w-full sm:w-52 focus:outline-none focus:border-calm-blue focus:ring-2 focus:ring-calm-blue/20 transition-colors placeholder:text-gray-300"
         />
       </div>
     </div>
