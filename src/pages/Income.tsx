@@ -121,8 +121,8 @@ export function IncomePage() {
                   <select value={editData.status}
                     onChange={(e) => setEditData((d) => ({ ...d, status: e.target.value as Income['status'] }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
-                    <option value="received">Received</option>
-                    <option value="pending">Pending</option>
+                    <option value="received">{t.received}</option>
+                    <option value="pending">{t.pending_status}</option>
                   </select>
                 </div>
               </div>
@@ -137,7 +137,7 @@ export function IncomePage() {
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="font-semibold text-gray-800">{fmt(inc.amount)}</span>
                   <Badge type={inc.status === 'received' ? 'success' : 'warning'}>
-                    {inc.status === 'received' ? 'Received' : 'Pending'}
+                    {inc.status === 'received' ? t.received : t.pending_status}
                   </Badge>
                 </div>
                 <p className="text-sm text-gray-400 truncate">{inc.source || '—'} · {inc.date}</p>

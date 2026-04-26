@@ -60,7 +60,7 @@ export function ExpensesPage() {
         </div>
         <button onClick={() => navigate('/expenses/add')}
           className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
-          <Plus size={16} /> Add expense
+          <Plus size={16} /> {t.add_expense}
         </button>
       </div>
 
@@ -139,8 +139,8 @@ export function ExpensesPage() {
                   <select value={editData.status ?? 'paid'}
                     onChange={(e) => setEditData((d) => ({ ...d, status: e.target.value as Expense['status'] }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
-                    <option value="paid">Paid</option>
-                    <option value="upcoming">Upcoming</option>
+                    <option value="paid">{t.paid}</option>
+                    <option value="upcoming">{t.upcoming}</option>
                   </select>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export function ExpensesPage() {
                   <span className="font-semibold text-gray-800">{fmt(exp.amount)}</span>
                   <span className="text-xs bg-beige-100 text-gray-500 px-2 py-0.5 rounded-full">{exp.category}</span>
                   <Badge type={(exp.status ?? 'paid') === 'paid' ? 'success' : 'warning'}>
-                    {(exp.status ?? 'paid') === 'paid' ? 'Paid' : 'Upcoming'}
+                    {(exp.status ?? 'paid') === 'paid' ? t.paid : t.upcoming}
                   </Badge>
                 </div>
                 <p className="text-sm text-gray-400 truncate">{exp.supplier || '—'} · {exp.date}</p>

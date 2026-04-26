@@ -1,4 +1,10 @@
-import type { InsightRule } from '../types';
+export type InsightId = 'deficit' | 'overspending' | 'low-margin' | 'pending-risk' | 'category-concentration' | 'good-condition';
+
+export interface InsightRule {
+  id: InsightId;
+  type: 'danger' | 'warning' | 'success' | 'info';
+  data: { pct?: number; categoryName?: string; categoryPct?: number };
+}
 
 interface InsightInput {
   totalIncome: number;
@@ -16,61 +22,25 @@ export function generateInsights(data: InsightInput): InsightRule[] {
   const pendingPct = (totalIncome + pendingIncome) > 0 ? pendingIncome / (totalIncome + pendingIncome) : 0;
 
   if (freeMoney < 0) {
-    results.push({
-      id: 'deficit',
-      type: 'danger',
-      title: 'Risk of Deficit',
-      observation: 'Your expenses exceed your income this period.',
-      action: 'Stop non-critical spending immediately and review your largest expense categories.',
-    });
+    results.push({ id: 'deficit', type: 'danger', data: {} });
   } else if (totalExpenses > totalIncome) {
-    results.push({
-      id: 'overspending',
-      type: 'danger',
-      title: 'Overspending Alert',
-      observation: 'Expenses are higher than received income.',
-      action: 'Reduce spending in your highest expense category.',
-    });
+    results.push({ id: 'overspending', type: 'danger', data: {} });
   }
 
   if (freeMoney >= 0 && freeMoneyPct < 0.1) {
-    results.push({
-      id: 'low-margin',
-      type: 'warning',
-      title: 'Low Free Money',
-      observation: 'Less than 10% of income is available as free money.',
-      action: 'Avoid non-essential spending this month.',
-    });
+    results.push({ id: 'low-margin', type: 'warning', data: {} });
   }
 
   if (pendingPct > 0.3) {
-    results.push({
-      id: 'pending-risk',
-      type: 'warning',
-      title: 'High Pending Income',
-      observation: `${Math.round(pendingPct * 100)}% of your expected income is still unpaid.`,
-      action: 'Follow up with clients on outstanding invoices.',
-    });
+    results.push({ id: 'pending-risk', type: 'warning', data: { pct: Math.round(pendingPct * 100) } });
   }
 
   if (topCategory && topCategory.pct > 40) {
-    results.push({
-      id: 'category-concentration',
-      type: 'info',
-      title: `High Spend: ${topCategory.name}`,
-      observation: `${topCategory.name} accounts for ${topCategory.pct}% of your expenses.`,
-      action: `Review your ${topCategory.name} expenses and see where you can cut back.`,
-    });
+    results.push({ id: 'category-concentration', type: 'info', data: { categoryName: topCategory.name, categoryPct: topCategory.pct } });
   }
 
   if (freeMoney > 0 && freeMoneyPct > 0.2) {
-    results.push({
-      id: 'good-condition',
-      type: 'success',
-      title: 'Good Financial Health',
-      observation: `You have ${Math.round(freeMoneyPct * 100)}% of income available as free money.`,
-      action: 'Consider setting aside some of this into savings.',
-    });
+    results.push({ id: 'good-condition', type: 'success', data: { pct: Math.round(freeMoneyPct * 100) } });
   }
 
   const priority = { danger: 0, warning: 1, info: 2, success: 3 };
