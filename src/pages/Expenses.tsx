@@ -152,12 +152,15 @@ export function ExpensesPage() {
           ) : (
             <Card key={exp.id} className="flex items-center gap-4">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                   <span className="font-semibold text-gray-800">{fmt(exp.amount)}</span>
                   <span className="text-xs bg-beige-100 text-gray-500 px-2 py-0.5 rounded-full">{exp.category}</span>
                   <Badge type={(exp.status ?? 'paid') === 'paid' ? 'success' : 'warning'}>
                     {(exp.status ?? 'paid') === 'paid' ? t.paid : t.upcoming}
                   </Badge>
+                  {exp.recurringGroupId && (
+                    <Badge type="info">{t.recurring_badge}</Badge>
+                  )}
                 </div>
                 <p className="text-sm text-gray-400 truncate">{exp.supplier || '—'} · {exp.date}</p>
               </div>

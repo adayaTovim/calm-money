@@ -134,11 +134,14 @@ export function IncomePage() {
           ) : (
             <Card key={inc.id} className="flex items-center gap-4">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                   <span className="font-semibold text-gray-800">{fmt(inc.amount)}</span>
                   <Badge type={inc.status === 'received' ? 'success' : 'warning'}>
                     {inc.status === 'received' ? t.received : t.pending_status}
                   </Badge>
+                  {inc.recurringGroupId && (
+                    <Badge type="info">{t.recurring_badge}</Badge>
+                  )}
                 </div>
                 <p className="text-sm text-gray-400 truncate">{inc.source || '—'} · {inc.date}</p>
               </div>

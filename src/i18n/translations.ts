@@ -87,6 +87,13 @@ const translations = {
     custom: '+ Custom',
     category_placeholder: 'Category name',
 
+    // Recurring
+    recurring_label: 'Recurring',
+    recurring_desc: 'Repeat this entry for the next months',
+    recurring_months: 'Number of months',
+    recurring_badge: 'Recurring',
+    recurring_success: (n: number) => `${n} entries created`,
+
     // FilterBar
     all_categories: 'All categories',
     all_time: 'All time',
@@ -272,6 +279,13 @@ const translations = {
     add_expense_btn: 'הוסף הוצאה',
     custom: '+ מותאם אישית',
     category_placeholder: 'שם קטגוריה',
+
+    // Recurring
+    recurring_label: 'חוזר',
+    recurring_desc: 'חזור על רשומה זו בחודשים הבאים',
+    recurring_months: 'מספר חודשים',
+    recurring_badge: 'חוזר',
+    recurring_success: (n: number) => `נוצרו ${n} רשומות`,
 
     // FilterBar
     all_categories: 'כל הקטגוריות',

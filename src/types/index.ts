@@ -7,6 +7,7 @@ export interface Income {
   source: string;
   date: string;
   status: IncomeStatus;
+  recurringGroupId?: string;
   notes?: string;
 }
 
@@ -19,6 +20,7 @@ export interface Expense {
   supplier?: string;
   date: string;
   status: ExpenseStatus;
+  recurringGroupId?: string;
   notes?: string;
 }
 
