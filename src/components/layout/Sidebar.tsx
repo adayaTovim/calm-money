@@ -19,13 +19,8 @@ export function Sidebar() {
     { to: '/settings', icon: Settings, label: t.settings },
   ];
 
-  const mobileLinks = [
-    links[0], // Dashboard
-    links[1], // Income
-    links[2], // Expenses
-    links[3], // Insights
-    links[6], // Settings
-  ];
+  const MOBILE_PATHS = ['/', '/income', '/expenses', '/upload', '/settings'];
+  const mobileLinks = links.filter((l) => MOBILE_PATHS.includes(l.to));
 
   return (
     <>
@@ -60,20 +55,20 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 flex items-center justify-around px-2 py-1">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 flex items-center justify-around px-1 py-1">
         {mobileLinks.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-colors ${
+              `flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors flex-1 ${
                 isActive ? 'text-calm-blue' : 'text-gray-400'
               }`
             }
           >
-            <Icon size={20} />
-            <span className="text-[10px] font-medium">{label}</span>
+            <Icon size={19} />
+            <span className="text-[9px] font-medium leading-tight text-center">{label}</span>
           </NavLink>
         ))}
       </nav>
