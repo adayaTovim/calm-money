@@ -386,7 +386,7 @@ const translations = {
     export_sheet_expenses: 'הוצאות',
     export_sheet_by_category: 'לפי קטגוריה',
     export_sheet_by_month: 'לפי חודש',
-    export_report_title: 'כסף רגוע — דוח פיננסי',
+    export_report_title: 'Calm Money — דוח פיננסי',
     export_period: 'תקופה',
     export_metric: 'מדד',
     export_value: 'ערך',
