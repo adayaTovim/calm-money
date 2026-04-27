@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Lightbulb,
@@ -7,12 +6,13 @@ import {
 import { useT } from '../../i18n/useT';
 import { useStore } from '../../store/useStore';
 
+type LinkItem = { to: string; icon: React.ElementType; label: string };
+
 export function Sidebar() {
   const t = useT();
-  const location = useLocation();
   const navStyle = useStore((s) => s.navStyle);
 
-  const links = [
+  const links: LinkItem[] = [
     { to: '/', icon: LayoutDashboard, label: t.dashboard },
     { to: '/income', icon: TrendingUp, label: t.income },
     { to: '/expenses', icon: TrendingDown, label: t.expenses },
@@ -46,21 +46,17 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile nav */}
-      {navStyle === 'icons' ? (
-        <IconsNav links={links} />
-      ) : (
-        <PillNav links={links} />
-      )}
+      {navStyle === 'icons' ? <IconsNav links={links} /> : <PillNav links={links} />}
     </>
   );
 }
 
 // ── Option A: Icons only ───────────────────────────────────────────────────
-function IconsNav({ links }: { links: { to: string; icon: React.ElementType; label: string }[] }) {
+function IconsNav({ links }: { links: LinkItem[] }) {
   const location = useLocation();
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-t border-beige-200 flex items-center justify-around px-2 py-2">
-      {links.map(({ to, icon: Icon, label }) => {
+      {links.map(({ to, icon: Icon }) => {
         const isActive = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
         return (
           <NavLink key={to} to={to} end={to === '/'}
@@ -79,12 +75,12 @@ function IconsNav({ links }: { links: { to: string; icon: React.ElementType; lab
 }
 
 // ── Option B: Floating pill ────────────────────────────────────────────────
-function PillNav({ links }: { links: { to: string; icon: React.ElementType; label: string }[] }) {
+function PillNav({ links }: { links: LinkItem[] }) {
   const location = useLocation();
   return (
     <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50">
       <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-beige-200 flex items-center justify-around px-3 py-2.5">
-        {links.map(({ to, icon: Icon, label }) => {
+        {links.map(({ to, icon: Icon }) => {
           const isActive = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
           return (
             <NavLink key={to} to={to} end={to === '/'}
