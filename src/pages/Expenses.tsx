@@ -56,8 +56,8 @@ export function ExpensesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Expenses</h1>
-          <p className="text-gray-400 text-sm mt-0.5">{sorted.length} of {expenses.length} entries</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t.expenses_title}</h1>
+          <p className="text-gray-400 text-sm mt-0.5">{t.entries_of(sorted.length, expenses.length)}</p>
         </div>
         <button onClick={() => navigate('/expenses/add')}
           className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
@@ -89,7 +89,7 @@ export function ExpensesPage() {
       {/* Empty state */}
       {expenses.length === 0 && (
         <Card className="text-center py-10">
-          <p className="text-gray-400 mb-4">No expense entries yet.</p>
+          <p className="text-gray-400 mb-4">{t.no_expenses_yet2}</p>
           <button onClick={() => navigate('/expenses/add')}
             className="flex items-center gap-2 mx-auto bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
             <Plus size={16} /> Add your first expense

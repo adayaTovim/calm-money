@@ -37,23 +37,6 @@ export function SettingsPage() {
         <p className="text-gray-400 text-sm mt-0.5">{t.settings_sub}</p>
       </div>
 
-      {/* Nav style — mobile only */}
-      <Card className="md:hidden">
-        <h2 className="font-semibold text-gray-700 mb-3">{t.nav_style}</h2>
-        <div className="flex gap-3">
-          {(['icons', 'pill', 'labels'] as const).map((style) => (
-            <button key={style} onClick={() => setNavStyle(style)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                navStyle === style
-                  ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
-                  : 'border-beige-200 text-gray-400 hover:bg-beige-50'
-              }`}>
-              {style === 'icons' ? t.nav_icons : style === 'pill' ? t.nav_pill : t.nav_labels}
-            </button>
-          ))}
-        </div>
-      </Card>
-
       {/* Language */}
       <Card>
         <h2 className="font-semibold text-gray-700 mb-3">{t.language}</h2>
@@ -110,6 +93,23 @@ export function SettingsPage() {
           <li>{t.task_entries(tasks.length)}</li>
         </ul>
         <p className="text-xs text-gray-400 mt-3">{t.local_storage_note}</p>
+      </Card>
+
+      {/* Nav style — mobile only */}
+      <Card className="md:hidden">
+        <h2 className="font-semibold text-gray-700 mb-3">{t.nav_style}</h2>
+        <div className="flex flex-col gap-2">
+          {(['icons', 'pill', 'labels'] as const).map((style) => (
+            <button key={style} onClick={() => setNavStyle(style)}
+              className={`w-full py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                navStyle === style
+                  ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
+                  : 'border-beige-200 text-gray-400 hover:bg-beige-50'
+              }`}>
+              {style === 'icons' ? t.nav_icons : style === 'pill' ? t.nav_pill : t.nav_labels}
+            </button>
+          ))}
+        </div>
       </Card>
 
       {/* Clear data */}

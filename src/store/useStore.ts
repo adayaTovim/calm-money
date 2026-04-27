@@ -57,7 +57,7 @@ export const useStore = create<StoreState>()(
       dateTo: defaultTo,
       onboardingDone: false,
       language: 'en',
-      navStyle: 'icons',
+      navStyle: 'labels',
 
       addIncome: (income) =>
         set((s) => ({ incomes: [...s.incomes, { ...income, id: uid() }] })),
