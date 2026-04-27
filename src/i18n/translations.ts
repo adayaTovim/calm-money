@@ -15,7 +15,7 @@ const translations = {
     nav_style: 'Navigation style',
     nav_icons: 'A · Icons only',
     nav_pill: 'B · Floating pill',
-    nav_labels: 'C · Labels + More',
+    nav_labels: 'C · Classic tabs',
 
     // Onboarding
     onboarding_title: 'Calm Money',
@@ -271,7 +271,7 @@ const translations = {
     nav_style: 'סגנון ניווט',
     nav_icons: 'A · אייקונים בלבד',
     nav_pill: 'B · כפתור צף',
-    nav_labels: 'C · תוויות + עוד',
+    nav_labels: 'C · כרטיסיות קלאסיות',
 
     // Onboarding
     onboarding_title: 'כסף רגוע',
@@ -350,7 +350,7 @@ const translations = {
 
     // Expense categories
     cat_rent: 'שכירות',
-    cat_salaries: 'שכר',
+    cat_salaries: 'משכורות',
     cat_marketing: 'שיווק',
     cat_software: 'תוכנה',
     cat_equipment: 'ציוד',
