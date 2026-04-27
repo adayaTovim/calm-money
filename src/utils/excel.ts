@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import type { Income, Expense } from '../types';
+import type { Translations } from '../i18n/translations';
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -140,6 +141,7 @@ interface ExportData {
   expenses: Expense[];
   dateFrom: string;
   dateTo: string;
+  t: Translations;
 }
 
 function setColWidths(ws: XLSX.WorkSheet, widths: number[]) {
@@ -147,7 +149,7 @@ function setColWidths(ws: XLSX.WorkSheet, widths: number[]) {
 }
 
 export function exportToExcel(data: ExportData) {
-  const { incomes, expenses, dateFrom, dateTo } = data;
+  const { incomes, expenses, dateFrom, dateTo, t } = data;
   const wb = XLSX.utils.book_new();
   const period = `${dateFrom} → ${dateTo}`;
 
@@ -171,57 +173,60 @@ export function exportToExcel(data: ExportData) {
   })();
 
   const summaryRows = [
-    ['Calm Money — Financial Report'],
-    [`Period: ${period}`],
+    [t.export_report_title],
+    [`${t.export_period}: ${period}`],
     [],
-    ['Metric', 'Value'],
-    ['Total Income (received)', totalIncome],
-    ['Pending Income', totalPending],
-    ['Total Expenses', totalExpenses],
-    ['Balance', totalIncome - totalExpenses],
-    ['Free Money', freeMoney],
-    ['Free Money %', `${freeMoneyPct}%`],
-    ['Financial Health Score', `${healthScore} / 100`],
+    [t.export_metric, t.export_value],
+    [t.export_total_income, totalIncome],
+    [t.export_pending_income, totalPending],
+    [t.export_total_expenses, totalExpenses],
+    [t.export_balance, totalIncome - totalExpenses],
+    [t.export_free_money, freeMoney],
+    [t.export_free_money_pct, `${freeMoneyPct}%`],
+    [t.export_health_score, `${healthScore} / 100`],
   ];
   const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
-  setColWidths(wsSummary, [30, 20]);
-  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+  setColWidths(wsSummary, [34, 20]);
+  XLSX.utils.book_append_sheet(wb, wsSummary, t.export_sheet_summary);
 
   // ── 2. Income sheet ────────────────────────────────────────────────────────
   const incomeRows = [
-    ['Amount (₪)', 'Source', 'Date', 'Status'],
-    ...incomes.map((i) => [i.amount, i.source, i.date, i.status]),
+    [t.export_amount, t.export_source, t.export_date, t.export_status],
+    ...incomes.map((i) => [i.amount, i.source, i.date, i.status === 'received' ? t.received : t.pending_status]),
     [],
-    ['Total Received', totalIncome],
-    ['Total Pending', totalPending],
+    [t.export_total_received, totalIncome],
+    [t.export_total_pending, totalPending],
   ];
   const wsIncome = XLSX.utils.aoa_to_sheet(incomeRows);
-  setColWidths(wsIncome, [14, 30, 14, 12]);
-  XLSX.utils.book_append_sheet(wb, wsIncome, 'Income');
+  setColWidths(wsIncome, [14, 30, 14, 14]);
+  XLSX.utils.book_append_sheet(wb, wsIncome, t.export_sheet_income);
 
   // ── 3. Expenses sheet ─────────────────────────────────────────────────────
   const expenseRows = [
-    ['Amount (₪)', 'Category', 'Supplier', 'Date', 'Status'],
-    ...expenses.map((e) => [e.amount, e.category, e.supplier ?? '', e.date, e.status ?? 'paid']),
+    [t.export_amount, t.export_category, t.export_supplier, t.export_date, t.export_status],
+    ...expenses.map((e) => [
+      e.amount, e.category, e.supplier ?? '', e.date,
+      (e.status ?? 'paid') === 'paid' ? t.paid : t.upcoming,
+    ]),
     [],
-    ['Total', totalExpenses],
+    [t.export_total, totalExpenses],
   ];
   const wsExpenses = XLSX.utils.aoa_to_sheet(expenseRows);
-  setColWidths(wsExpenses, [14, 16, 28, 14, 12]);
-  XLSX.utils.book_append_sheet(wb, wsExpenses, 'Expenses');
+  setColWidths(wsExpenses, [14, 18, 28, 14, 14]);
+  XLSX.utils.book_append_sheet(wb, wsExpenses, t.export_sheet_expenses);
 
   // ── 4. Category breakdown ─────────────────────────────────────────────────
   const catMap: Record<string, number> = {};
   expenses.forEach((e) => { catMap[e.category] = (catMap[e.category] || 0) + e.amount; });
   const catRows = [
-    ['Category', 'Amount (₪)', '% of Expenses'],
+    [t.export_category, t.export_amount, t.export_pct_expenses],
     ...Object.entries(catMap)
       .sort((a, b) => b[1] - a[1])
       .map(([cat, amt]) => [cat, amt, totalExpenses > 0 ? `${Math.round((amt / totalExpenses) * 100)}%` : '0%']),
   ];
   const wsCat = XLSX.utils.aoa_to_sheet(catRows);
-  setColWidths(wsCat, [20, 16, 18]);
-  XLSX.utils.book_append_sheet(wb, wsCat, 'By Category');
+  setColWidths(wsCat, [22, 16, 18]);
+  XLSX.utils.book_append_sheet(wb, wsCat, t.export_sheet_by_category);
 
   // ── 5. Monthly breakdown ──────────────────────────────────────────────────
   const monthMap: Record<string, { income: number; expenses: number }> = {};
@@ -236,7 +241,7 @@ export function exportToExcel(data: ExportData) {
     monthMap[m].expenses += e.amount;
   });
   const monthRows = [
-    ['Month', 'Income (₪)', 'Expenses (₪)', 'Free Money (₪)', 'Free Money %'],
+    [t.export_month, t.export_income_col, t.export_expenses_col, t.export_free_col, t.export_free_money_pct],
     ...Object.entries(monthMap)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([month, { income, expenses: exp }]) => {
@@ -246,8 +251,8 @@ export function exportToExcel(data: ExportData) {
       }),
   ];
   const wsMonthly = XLSX.utils.aoa_to_sheet(monthRows);
-  setColWidths(wsMonthly, [12, 14, 16, 16, 14]);
-  XLSX.utils.book_append_sheet(wb, wsMonthly, 'By Month');
+  setColWidths(wsMonthly, [12, 16, 18, 18, 16]);
+  XLSX.utils.book_append_sheet(wb, wsMonthly, t.export_sheet_by_month);
 
   const filename = `calm-money-report-${dateFrom}-${dateTo}.xlsx`;
   XLSX.writeFile(wb, filename);

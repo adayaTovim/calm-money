@@ -80,7 +80,7 @@ export function Dashboard() {
             className="flex-1 sm:flex-none border border-beige-200 rounded-lg px-2 py-1.5 bg-white text-gray-600 text-xs md:text-sm" />
           {hasData && (
             <button
-              onClick={() => exportToExcel({ incomes, expenses, dateFrom, dateTo })}
+              onClick={() => exportToExcel({ incomes, expenses, dateFrom, dateTo, t })}
               className="flex items-center gap-1.5 border border-beige-200 bg-white px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-beige-50 transition-colors shrink-0">
               <Download size={13} /> {t.export_btn}
             </button>

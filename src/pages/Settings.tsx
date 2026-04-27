@@ -16,6 +16,7 @@ export function SettingsPage() {
       expenses,
       dateFrom: format(startOfMonth(now), 'yyyy-MM-dd'),
       dateTo: format(endOfMonth(now), 'yyyy-MM-dd'),
+      t,
     });
   };
   const t = useT();
