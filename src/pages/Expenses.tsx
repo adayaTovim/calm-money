@@ -92,14 +92,14 @@ export function ExpensesPage() {
           <p className="text-gray-400 mb-4">{t.no_expenses_yet2}</p>
           <button onClick={() => navigate('/expenses/add')}
             className="flex items-center gap-2 mx-auto bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
-            <Plus size={16} /> Add your first expense
+            <Plus size={16} /> {t.add_first_expense}
           </button>
         </Card>
       )}
 
       {expenses.length > 0 && sorted.length === 0 && (
         <Card className="text-center py-8">
-          <p className="text-gray-400">No entries match your filters.</p>
+          <p className="text-gray-400">{t.no_match}</p>
         </Card>
       )}
 
