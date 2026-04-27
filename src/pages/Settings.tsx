@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Download, FileUp, ListChecks, Bell, ChevronRight } from 'lucide-react';
+import { Trash2, Download, FileUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
@@ -53,23 +53,6 @@ export function SettingsPage() {
           ))}
         </div>
       </Card>
-
-      {/* Mobile-only quick links */}
-      <div className="md:hidden space-y-2">
-        {[
-          { to: '/tasks', icon: ListChecks, label: t.tasks },
-          { to: '/alerts', icon: Bell, label: t.alerts },
-        ].map(({ to, icon: Icon, label }) => (
-          <Card key={to} onClick={() => navigate(to)}
-            className="flex items-center justify-between cursor-pointer hover:bg-beige-50 transition-colors py-3">
-            <div className="flex items-center gap-3">
-              <Icon size={18} className="text-calm-blue" />
-              <span className="text-sm font-medium text-gray-700">{label}</span>
-            </div>
-            <ChevronRight size={16} className="text-gray-300 rtl:rotate-180" />
-          </Card>
-        ))}
-      </div>
 
       {/* Import Excel */}
       <Card className="flex items-center justify-between gap-4">

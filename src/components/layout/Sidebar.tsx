@@ -18,7 +18,7 @@ export function Sidebar() {
     { to: '/settings', icon: Settings, label: t.settings },
   ];
 
-  const MOBILE_PATHS = ['/', '/income', '/expenses', '/insights', '/settings'];
+  const MOBILE_PATHS = ['/', '/income', '/expenses', '/tasks', '/alerts', '/settings'];
   const mobileLinks = links.filter((l) => MOBILE_PATHS.includes(l.to));
 
   return (
