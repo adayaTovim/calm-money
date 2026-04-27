@@ -101,24 +101,31 @@ export function parseExcelFile(file: File): Promise<ParsedExcelData> {
             else if (isExpenseBySheet) isIncome = false;
             else isIncome = amount > 0; // fallback: sign-based
 
+            // Parse status value from cell
+            const rawStatus = String(get(['status', 'סטטוס']) || '').toLowerCase().trim();
+            const incomeStatus: Income['status'] =
+              rawStatus.includes('pend') || rawStatus.includes('ממתין') ? 'pending' : 'received';
+            const expenseStatus: Expense['status'] =
+              rawStatus.includes('upcom') || rawStatus.includes('עתידי') ? 'upcoming' : 'paid';
+
             if (isIncome) {
               incomes.push({
                 id: uid(),
                 amount: Math.abs(amount),
                 source: description,
                 date,
-                status: 'received',
+                status: incomeStatus,
               });
             } else {
-              const category = get(['category', 'קטגוריה']) as string
-                || guessCategory(description);
+              const rawCategory = String(get(['category', 'קטגוריה']) || '').trim();
+              const category = rawCategory || guessCategory(description);
               expenses.push({
                 id: uid(),
                 amount: Math.abs(amount),
-                category: String(category) || 'Other',
+                category: category || 'Other',
                 supplier: description,
                 date,
-                status: 'paid',
+                status: expenseStatus,
               });
             }
           });
@@ -261,22 +268,22 @@ export function exportToExcel(data: ExportData) {
 // ─── TEMPLATE ───────────────────────────────────────────────────────────────
 
 // Generate a template Excel file for download
-export function downloadTemplate() {
+export function downloadTemplate(t: Translations) {
   const wb = XLSX.utils.book_new();
 
   const incomeData = [
-    ['Amount', 'Source', 'Date', 'Status'],
-    [5000, 'Client A', '01/04/2026', 'received'],
-    [3000, 'Client B', '15/04/2026', 'pending'],
+    [t.export_amount, t.export_source, t.export_date, t.export_status],
+    [5000, t.received === 'Received' ? 'Client A' : 'לקוח א', '01/04/2026', t.received],
+    [3000, t.received === 'Received' ? 'Client B' : 'לקוח ב', '15/04/2026', t.pending_status],
   ];
   const expenseData = [
-    ['Amount', 'Category', 'Supplier', 'Date', 'Status'],
-    [1500, 'Rent', 'Landlord', '01/04/2026', 'paid'],
-    [800, 'Software', 'Adobe', '05/04/2026', 'paid'],
-    [300, 'Travel', 'Fuel', '10/04/2026', 'upcoming'],
+    [t.export_amount, t.export_category, t.export_supplier, t.export_date, t.export_status],
+    [1500, t.received === 'Received' ? 'Rent' : 'שכירות', t.received === 'Received' ? 'Landlord' : 'בעל הדירה', '01/04/2026', t.paid],
+    [800, t.received === 'Received' ? 'Software' : 'תוכנה', 'Adobe', '05/04/2026', t.paid],
+    [300, t.received === 'Received' ? 'Travel' : 'נסיעות', t.received === 'Received' ? 'Fuel' : 'דלק', '10/04/2026', t.upcoming],
   ];
 
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(incomeData), 'Income');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(expenseData), 'Expenses');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(incomeData), t.export_sheet_income);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(expenseData), t.export_sheet_expenses);
   XLSX.writeFile(wb, 'calm-money-template.xlsx');
 }

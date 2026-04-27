@@ -94,7 +94,7 @@ export function UploadPage() {
           <p className="text-sm font-medium text-gray-700">{t.upload_template}</p>
           <p className="text-xs text-gray-400">{t.upload_template_desc}</p>
         </div>
-        <button onClick={downloadTemplate}
+        <button onClick={() => downloadTemplate(t)}
           className="flex items-center gap-2 border border-beige-200 px-3 py-2 rounded-xl text-sm text-gray-600 hover:bg-beige-50 transition-colors shrink-0">
           <Download size={15} /> {t.upload_template}
         </button>
