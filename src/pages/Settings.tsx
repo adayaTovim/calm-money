@@ -41,14 +41,14 @@ export function SettingsPage() {
       <Card className="md:hidden">
         <h2 className="font-semibold text-gray-700 mb-3">{t.nav_style}</h2>
         <div className="flex gap-3">
-          {(['icons', 'pill'] as const).map((style) => (
+          {(['icons', 'pill', 'labels'] as const).map((style) => (
             <button key={style} onClick={() => setNavStyle(style)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                 navStyle === style
                   ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
                   : 'border-beige-200 text-gray-400 hover:bg-beige-50'
               }`}>
-              {style === 'icons' ? t.nav_icons : t.nav_pill}
+              {style === 'icons' ? t.nav_icons : style === 'pill' ? t.nav_pill : t.nav_labels}
             </button>
           ))}
         </div>

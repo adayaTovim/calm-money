@@ -15,6 +15,7 @@ const translations = {
     nav_style: 'Navigation style',
     nav_icons: 'A — Icons',
     nav_pill: 'B — Pill',
+    nav_labels: 'C — Labels + More',
 
     // Onboarding
     onboarding_title: 'Calm Money',
@@ -259,6 +260,7 @@ const translations = {
     nav_style: 'סגנון ניווט',
     nav_icons: 'A — אייקונים',
     nav_pill: 'B — כפתור צף',
+    nav_labels: 'C — תוויות + עוד',
 
     // Onboarding
     onboarding_title: 'כסף רגוע',

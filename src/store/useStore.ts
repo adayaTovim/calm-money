@@ -12,7 +12,7 @@ interface StoreState {
   dateTo: string;
   onboardingDone: boolean;
   language: Lang;
-  navStyle: 'icons' | 'pill';
+  navStyle: 'icons' | 'pill' | 'labels';
 
   addIncome: (income: Omit<Income, 'id'>) => void;
   updateIncome: (id: string, income: Partial<Income>) => void;
@@ -31,7 +31,7 @@ interface StoreState {
   setDateRange: (from: string, to: string) => void;
   setOnboardingDone: () => void;
   setLanguage: (lang: Lang) => void;
-  setNavStyle: (style: 'icons' | 'pill') => void;
+  setNavStyle: (style: 'icons' | 'pill' | 'labels') => void;
 
   filteredIncomes: () => Income[];
   filteredExpenses: () => Expense[];

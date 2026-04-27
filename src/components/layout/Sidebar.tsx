@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Lightbulb,
-  Bell, ListChecks, Settings, Scale,
+  Bell, ListChecks, Settings, Scale, MoreHorizontal, X,
 } from 'lucide-react';
 import { useT } from '../../i18n/useT';
+import type { Translations } from '../../i18n/translations';
 import { useStore } from '../../store/useStore';
 
 type LinkItem = { to: string; icon: React.ElementType; label: string };
@@ -46,7 +48,9 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile nav */}
-      {navStyle === 'icons' ? <IconsNav links={links} /> : <PillNav links={links} />}
+      {navStyle === 'icons' && <IconsNav links={links} />}
+      {navStyle === 'pill' && <PillNav links={links} />}
+      {navStyle === 'labels' && <LabelsNav links={links} t={t} />}
     </>
   );
 }
@@ -71,6 +75,52 @@ function IconsNav({ links }: { links: LinkItem[] }) {
         );
       })}
     </nav>
+  );
+}
+
+// ── Option C: Labels + More ────────────────────────────────────────────────
+function LabelsNav({ links, t }: { links: LinkItem[]; t: Translations }) {
+  const location = useLocation();
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const mainLinks = links.slice(0, 5);
+  const moreLinks = links.slice(5);
+  const isMoreActive = moreLinks.some((l) => location.pathname.startsWith(l.to));
+
+  return (
+    <>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-t border-beige-200 flex items-center justify-around px-1 py-1">
+        {mainLinks.map(({ to, icon: Icon, label }) => (
+          <NavLink key={to} to={to} end={to === '/'}
+            onClick={() => setMoreOpen(false)}
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors flex-1 ${isActive ? 'text-calm-blue' : 'text-gray-400'}`}>
+            <Icon size={19} />
+            <span className="text-[9px] font-medium leading-tight text-center">{label}</span>
+          </NavLink>
+        ))}
+        <button onClick={() => setMoreOpen((o) => !o)}
+          className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors flex-1 ${moreOpen || isMoreActive ? 'text-calm-blue' : 'text-gray-400'}`}>
+          {moreOpen ? <X size={19} /> : <MoreHorizontal size={19} />}
+          <span className="text-[9px] font-medium leading-tight">{t.more}</span>
+        </button>
+      </nav>
+      {moreOpen && (
+        <>
+          <div className="md:hidden fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
+          <div className="md:hidden fixed bottom-16 end-2 z-50 bg-white rounded-2xl shadow-lg border border-beige-200 overflow-hidden w-44">
+            {moreLinks.map(({ to, icon: Icon, label }) => (
+              <NavLink key={to} to={to} onClick={() => setMoreOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${isActive ? 'text-calm-blue bg-calm-blue-light' : 'text-gray-600 hover:bg-beige-50'}`}>
+                <Icon size={17} />
+                {label}
+              </NavLink>
+            ))}
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
