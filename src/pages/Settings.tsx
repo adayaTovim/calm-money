@@ -1,14 +1,19 @@
 import { useState } from 'react';
-import { Trash2, Download } from 'lucide-react';
+import { Trash2, Download, FileUp, ListChecks, Bell, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { useT } from '../i18n/useT';
 import type { Lang } from '../i18n/translations';
-import { exportToExcel } from '../utils/excel';
+import { exportToExcel, downloadTemplate } from '../utils/excel';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 export function SettingsPage() {
+  const navigate = useNavigate();
   const { incomes, expenses, tasks, language, setLanguage } = useStore();
+  const t = useT();
+  const [confirmed, setConfirmed] = useState(false);
+
   const handleExport = () => {
     const now = new Date();
     exportToExcel({
@@ -19,8 +24,6 @@ export function SettingsPage() {
       t,
     });
   };
-  const t = useT();
-  const [confirmed, setConfirmed] = useState(false);
 
   const clearAll = () => {
     localStorage.removeItem('calm-money-store');
@@ -28,29 +31,61 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-lg mx-auto space-y-6">
+    <div className="p-4 md:p-6 max-w-lg mx-auto space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-gray-800">{t.settings_title}</h1>
         <p className="text-gray-400 text-sm mt-0.5">{t.settings_sub}</p>
       </div>
 
-      {/* Language switcher */}
+      {/* Language */}
       <Card>
         <h2 className="font-semibold text-gray-700 mb-3">{t.language}</h2>
         <div className="flex gap-3">
           {(['en', 'he'] as Lang[]).map((lang) => (
-            <button
-              key={lang}
-              onClick={() => setLanguage(lang)}
+            <button key={lang} onClick={() => setLanguage(lang)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                 language === lang
                   ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
                   : 'border-beige-200 text-gray-400 hover:bg-beige-50'
-              }`}
-            >
+              }`}>
               {lang === 'en' ? '🇺🇸 English' : '🇮🇱 עברית'}
             </button>
           ))}
+        </div>
+      </Card>
+
+      {/* Mobile-only quick links */}
+      <div className="md:hidden space-y-2">
+        {[
+          { to: '/tasks', icon: ListChecks, label: t.tasks },
+          { to: '/alerts', icon: Bell, label: t.alerts },
+        ].map(({ to, icon: Icon, label }) => (
+          <Card key={to} onClick={() => navigate(to)}
+            className="flex items-center justify-between cursor-pointer hover:bg-beige-50 transition-colors py-3">
+            <div className="flex items-center gap-3">
+              <Icon size={18} className="text-calm-blue" />
+              <span className="text-sm font-medium text-gray-700">{label}</span>
+            </div>
+            <ChevronRight size={16} className="text-gray-300 rtl:rotate-180" />
+          </Card>
+        ))}
+      </div>
+
+      {/* Import Excel */}
+      <Card className="flex items-center justify-between gap-4">
+        <div>
+          <h2 className="font-semibold text-gray-700 mb-1">{t.upload_nav}</h2>
+          <p className="text-xs text-gray-400">{t.upload_sub}</p>
+        </div>
+        <div className="flex flex-col gap-2 shrink-0">
+          <button onClick={() => navigate('/upload')}
+            className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
+            <FileUp size={15} /> {t.upload_nav}
+          </button>
+          <button onClick={() => downloadTemplate(t)}
+            className="flex items-center gap-2 border border-beige-200 text-gray-500 px-4 py-2 rounded-xl text-sm hover:bg-beige-50 transition-colors">
+            <Download size={15} /> {t.upload_template}
+          </button>
         </div>
       </Card>
 
@@ -61,11 +96,12 @@ export function SettingsPage() {
           <p className="text-xs text-gray-400">{t.export_desc}</p>
         </div>
         <button onClick={handleExport}
-          className="flex items-center gap-2 bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shrink-0">
+          className="flex items-center gap-2 bg-calm-green text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shrink-0">
           <Download size={15} /> {t.export_btn}
         </button>
       </Card>
 
+      {/* Data summary */}
       <Card>
         <h2 className="font-semibold text-gray-700 mb-3">{t.data_summary}</h2>
         <ul className="text-sm text-gray-500 space-y-1">
@@ -76,6 +112,7 @@ export function SettingsPage() {
         <p className="text-xs text-gray-400 mt-3">{t.local_storage_note}</p>
       </Card>
 
+      {/* Clear data */}
       <Card className="border border-calm-red/20">
         <h2 className="font-semibold text-calm-red mb-2">{t.clear_data}</h2>
         <p className="text-sm text-gray-400 mb-4">{t.clear_data_desc}</p>
