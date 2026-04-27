@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Lightbulb,
-  Bell, ListChecks, Settings, Scale,
+  Bell, ListChecks, Settings, Scale, FileUp,
 } from 'lucide-react';
 import { useT } from '../../i18n/useT';
 
@@ -13,6 +13,7 @@ export function Sidebar() {
     { to: '/income', icon: TrendingUp, label: t.income },
     { to: '/expenses', icon: TrendingDown, label: t.expenses },
     { to: '/insights', icon: Lightbulb, label: t.insights },
+    { to: '/upload', icon: FileUp, label: t.upload_nav },
     { to: '/tasks', icon: ListChecks, label: t.tasks },
     { to: '/alerts', icon: Bell, label: t.alerts },
     { to: '/settings', icon: Settings, label: t.settings },
