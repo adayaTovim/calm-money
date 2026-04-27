@@ -2,32 +2,25 @@ import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, TrendingUp, TrendingDown, Lightbulb,
-  Bell, ListChecks, Settings, Scale, MoreHorizontal, X,
+  Bell, ListChecks, Settings, Scale,
 } from 'lucide-react';
 import { useT } from '../../i18n/useT';
+import { useStore } from '../../store/useStore';
 
 export function Sidebar() {
   const t = useT();
   const location = useLocation();
-  const [moreOpen, setMoreOpen] = useState(false);
-
-  // Close "More" menu on navigation
-  useEffect(() => { setMoreOpen(false); }, [location.pathname]);
+  const navStyle = useStore((s) => s.navStyle);
 
   const links = [
     { to: '/', icon: LayoutDashboard, label: t.dashboard },
     { to: '/income', icon: TrendingUp, label: t.income },
     { to: '/expenses', icon: TrendingDown, label: t.expenses },
+    { to: '/insights', icon: Lightbulb, label: t.insights },
     { to: '/tasks', icon: ListChecks, label: t.tasks },
     { to: '/alerts', icon: Bell, label: t.alerts },
-    { to: '/insights', icon: Lightbulb, label: t.insights },
     { to: '/settings', icon: Settings, label: t.settings },
   ];
-
-  const mainMobileLinks = links.slice(0, 5);   // Dashboard, Income, Expenses, Tasks, Alerts
-  const moreLinks = links.slice(5);             // Insights, Settings
-
-  const isMoreActive = moreLinks.some((l) => location.pathname === l.to);
 
   return (
     <>
@@ -52,48 +45,57 @@ export function Sidebar() {
         <div className="p-4 text-xs text-gray-400 border-t border-beige-200">{t.tagline}</div>
       </aside>
 
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 flex items-center justify-around px-1 py-1">
-        {mainMobileLinks.map(({ to, icon: Icon, label }) => (
-          <NavLink key={to} to={to} end={to === '/'}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors flex-1 ${
-                isActive ? 'text-calm-blue' : 'text-gray-400'
-              }`}>
-            <Icon size={19} />
-            <span className="text-[9px] font-medium leading-tight text-center">{label}</span>
-          </NavLink>
-        ))}
-
-        {/* More button */}
-        <button
-          onClick={() => setMoreOpen((o) => !o)}
-          className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors flex-1 ${
-            moreOpen || isMoreActive ? 'text-calm-blue' : 'text-gray-400'
-          }`}>
-          {moreOpen ? <X size={19} /> : <MoreHorizontal size={19} />}
-          <span className="text-[9px] font-medium leading-tight">{t.more}</span>
-        </button>
-      </nav>
-
-      {/* More popup */}
-      {moreOpen && (
-        <>
-          <div className="md:hidden fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
-          <div className="md:hidden fixed bottom-16 right-2 z-50 bg-white rounded-2xl shadow-lg border border-beige-200 overflow-hidden w-44">
-            {moreLinks.map(({ to, icon: Icon, label }) => (
-              <NavLink key={to} to={to}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
-                    isActive ? 'text-calm-blue bg-calm-blue-light' : 'text-gray-600 hover:bg-beige-50'
-                  }`}>
-                <Icon size={17} />
-                {label}
-              </NavLink>
-            ))}
-          </div>
-        </>
+      {/* Mobile nav */}
+      {navStyle === 'icons' ? (
+        <IconsNav links={links} />
+      ) : (
+        <PillNav links={links} />
       )}
     </>
+  );
+}
+
+// ── Option A: Icons only ───────────────────────────────────────────────────
+function IconsNav({ links }: { links: { to: string; icon: React.ElementType; label: string }[] }) {
+  const location = useLocation();
+  return (
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-t border-beige-200 flex items-center justify-around px-2 py-2">
+      {links.map(({ to, icon: Icon, label }) => {
+        const isActive = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
+        return (
+          <NavLink key={to} to={to} end={to === '/'}
+            className="flex flex-col items-center flex-1 relative py-1">
+            <div className={`p-1.5 rounded-xl transition-colors ${isActive ? 'bg-calm-blue-light' : ''}`}>
+              <Icon size={20} className={isActive ? 'text-calm-blue' : 'text-gray-400'} />
+            </div>
+            {isActive && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-calm-blue rounded-full" />
+            )}
+          </NavLink>
+        );
+      })}
+    </nav>
+  );
+}
+
+// ── Option B: Floating pill ────────────────────────────────────────────────
+function PillNav({ links }: { links: { to: string; icon: React.ElementType; label: string }[] }) {
+  const location = useLocation();
+  return (
+    <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-beige-200 flex items-center justify-around px-3 py-2.5">
+        {links.map(({ to, icon: Icon, label }) => {
+          const isActive = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
+          return (
+            <NavLink key={to} to={to} end={to === '/'}
+              className="flex flex-col items-center flex-1">
+              <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-calm-blue shadow-sm' : ''}`}>
+                <Icon size={19} className={isActive ? 'text-white' : 'text-gray-400'} />
+              </div>
+            </NavLink>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

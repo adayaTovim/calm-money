@@ -10,7 +10,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 export function SettingsPage() {
   const navigate = useNavigate();
-  const { incomes, expenses, tasks, language, setLanguage } = useStore();
+  const { incomes, expenses, tasks, language, setLanguage, navStyle, setNavStyle } = useStore();
   const t = useT();
   const [confirmed, setConfirmed] = useState(false);
 
@@ -36,6 +36,23 @@ export function SettingsPage() {
         <h1 className="text-2xl font-bold text-gray-800">{t.settings_title}</h1>
         <p className="text-gray-400 text-sm mt-0.5">{t.settings_sub}</p>
       </div>
+
+      {/* Nav style — mobile only */}
+      <Card className="md:hidden">
+        <h2 className="font-semibold text-gray-700 mb-3">{t.nav_style}</h2>
+        <div className="flex gap-3">
+          {(['icons', 'pill'] as const).map((style) => (
+            <button key={style} onClick={() => setNavStyle(style)}
+              className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                navStyle === style
+                  ? 'bg-calm-blue-light border-calm-blue text-calm-blue'
+                  : 'border-beige-200 text-gray-400 hover:bg-beige-50'
+              }`}>
+              {style === 'icons' ? t.nav_icons : t.nav_pill}
+            </button>
+          ))}
+        </div>
+      </Card>
 
       {/* Language */}
       <Card>

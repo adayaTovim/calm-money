@@ -12,6 +12,9 @@ const translations = {
     settings: 'Settings',
     tagline: 'Your finances, calmly.',
     more: 'More',
+    nav_style: 'Navigation style',
+    nav_icons: 'A — Icons',
+    nav_pill: 'B — Pill',
 
     // Onboarding
     onboarding_title: 'Calm Money',
@@ -253,6 +256,9 @@ const translations = {
     settings: 'הגדרות',
     tagline: 'הכספים שלך, ברוגע.',
     more: 'עוד',
+    nav_style: 'סגנון ניווט',
+    nav_icons: 'A — אייקונים',
+    nav_pill: 'B — כפתור צף',
 
     // Onboarding
     onboarding_title: 'כסף רגוע',

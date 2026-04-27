@@ -12,6 +12,7 @@ interface StoreState {
   dateTo: string;
   onboardingDone: boolean;
   language: Lang;
+  navStyle: 'icons' | 'pill';
 
   addIncome: (income: Omit<Income, 'id'>) => void;
   updateIncome: (id: string, income: Partial<Income>) => void;
@@ -30,6 +31,7 @@ interface StoreState {
   setDateRange: (from: string, to: string) => void;
   setOnboardingDone: () => void;
   setLanguage: (lang: Lang) => void;
+  setNavStyle: (style: 'icons' | 'pill') => void;
 
   filteredIncomes: () => Income[];
   filteredExpenses: () => Expense[];
@@ -55,6 +57,7 @@ export const useStore = create<StoreState>()(
       dateTo: defaultTo,
       onboardingDone: false,
       language: 'en',
+      navStyle: 'icons',
 
       addIncome: (income) =>
         set((s) => ({ incomes: [...s.incomes, { ...income, id: uid() }] })),
@@ -86,6 +89,7 @@ export const useStore = create<StoreState>()(
       setDateRange: (from, to) => set({ dateFrom: from, dateTo: to }),
       setOnboardingDone: () => set({ onboardingDone: true }),
       setLanguage: (lang) => set({ language: lang }),
+      setNavStyle: (style) => set({ navStyle: style }),
 
       filteredIncomes: () => {
         const { incomes, dateFrom, dateTo } = get();
@@ -109,6 +113,7 @@ export const useStore = create<StoreState>()(
         tasks: state.tasks,
         onboardingDone: state.onboardingDone,
         language: state.language,
+        navStyle: state.navStyle,
       }),
     }
   )
