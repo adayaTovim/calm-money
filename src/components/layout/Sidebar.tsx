@@ -72,7 +72,7 @@ export function Sidebar() {
             moreOpen || isMoreActive ? 'text-calm-blue' : 'text-gray-400'
           }`}>
           {moreOpen ? <X size={19} /> : <MoreHorizontal size={19} />}
-          <span className="text-[9px] font-medium leading-tight">More</span>
+          <span className="text-[9px] font-medium leading-tight">{t.more}</span>
         </button>
       </nav>
 

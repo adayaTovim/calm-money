@@ -11,6 +11,7 @@ const translations = {
     alerts: 'Alerts',
     settings: 'Settings',
     tagline: 'Your finances, calmly.',
+    more: 'More',
 
     // Onboarding
     onboarding_title: 'Calm Money',
@@ -251,6 +252,7 @@ const translations = {
     alerts: 'התראות',
     settings: 'הגדרות',
     tagline: 'הכספים שלך, ברוגע.',
+    more: 'עוד',
 
     // Onboarding
     onboarding_title: 'כסף רגוע',
