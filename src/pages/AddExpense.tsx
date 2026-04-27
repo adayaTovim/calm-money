@@ -32,7 +32,7 @@ export function AddExpense() {
     if (!form.amount || form.amount <= 0) { setError(t.amount_error); return; }
     const category = form.category === '__custom__' ? customCat || 'Other' : form.category;
 
-    if (recurring && months > 1) {
+    if (recurring && months >= 1) {
       const groupId = uid();
       for (let i = 0; i < months; i++) {
         const date = format(addMonths(new Date(form.date), i), 'yyyy-MM-dd');

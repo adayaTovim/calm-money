@@ -110,13 +110,13 @@ export function ExpensesPage() {
             <Card key={exp.id}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-400">Amount (₪)</label>
+                  <label className="text-xs text-gray-400">{t.amount_label}</label>
                   <input type="number" value={editData.amount}
                     onChange={(e) => setEditData((d) => ({ ...d, amount: +e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400">Category</label>
+                  <label className="text-xs text-gray-400">{t.category_label}</label>
                   <select value={editData.category}
                     onChange={(e) => setEditData((d) => ({ ...d, category: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
@@ -124,19 +124,19 @@ export function ExpensesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400">Supplier</label>
+                  <label className="text-xs text-gray-400">{t.supplier_label}</label>
                   <input value={editData.supplier || ''}
                     onChange={(e) => setEditData((d) => ({ ...d, supplier: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400">Date</label>
+                  <label className="text-xs text-gray-400">{t.date_label}</label>
                   <DateInput value={editData.date ?? ''}
                     onChange={(e) => setEditData((d) => ({ ...d, date: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400">Status</label>
+                  <label className="text-xs text-gray-400">{t.status_label}</label>
                   <select value={editData.status ?? 'paid'}
                     onChange={(e) => setEditData((d) => ({ ...d, status: e.target.value as Expense['status'] }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
@@ -146,8 +146,8 @@ export function ExpensesPage() {
                 </div>
               </div>
               <div className="flex gap-2 mt-3">
-                <button onClick={saveEdit} className="flex items-center gap-1 bg-calm-green text-white px-3 py-1.5 rounded-lg text-sm"><Check size={14} /> Save</button>
-                <button onClick={() => setEditId(null)} className="flex items-center gap-1 border border-beige-200 px-3 py-1.5 rounded-lg text-sm text-gray-500"><X size={14} /> Cancel</button>
+                <button onClick={saveEdit} className="flex items-center gap-1 bg-calm-green text-white px-3 py-1.5 rounded-lg text-sm"><Check size={14} /> {t.save}</button>
+                <button onClick={() => setEditId(null)} className="flex items-center gap-1 border border-beige-200 px-3 py-1.5 rounded-lg text-sm text-gray-500"><X size={14} /> {t.cancel_edit}</button>
               </div>
             </Card>
           ) : (
@@ -155,7 +155,7 @@ export function ExpensesPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                   <span className="font-semibold text-gray-800">{fmt(exp.amount)}</span>
-                  <span className="text-xs bg-beige-100 text-gray-500 px-2 py-0.5 rounded-full">{exp.category}</span>
+                  <span className="text-xs bg-beige-100 text-gray-500 px-2 py-0.5 rounded-full">{getCategoryLabel(exp.category, t)}</span>
                   <Badge type={(exp.status ?? 'paid') === 'paid' ? 'success' : 'warning'}>
                     {(exp.status ?? 'paid') === 'paid' ? t.paid : t.upcoming}
                   </Badge>

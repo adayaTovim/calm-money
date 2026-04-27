@@ -80,17 +80,17 @@ export function IncomePage() {
       {/* Empty state */}
       {incomes.length === 0 && (
         <Card className="text-center py-10">
-          <p className="text-gray-400 mb-4">No income entries yet.</p>
+          <p className="text-gray-400 mb-4">{t.no_income_yet}</p>
           <button onClick={() => navigate('/income/add')}
             className="flex items-center gap-2 mx-auto bg-calm-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
-            <Plus size={16} /> Add your first income
+            <Plus size={16} /> {t.add_first_income}
           </button>
         </Card>
       )}
 
       {incomes.length > 0 && sorted.length === 0 && (
         <Card className="text-center py-8">
-          <p className="text-gray-400">No entries match your filters.</p>
+          <p className="text-gray-400">{t.no_match}</p>
         </Card>
       )}
 
@@ -101,25 +101,25 @@ export function IncomePage() {
             <Card key={inc.id}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-400">Amount (₪)</label>
+                  <label className="text-xs text-gray-400">{t.amount_label}</label>
                   <input type="number" value={editData.amount}
                     onChange={(e) => setEditData((d) => ({ ...d, amount: +e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400">Source</label>
+                  <label className="text-xs text-gray-400">{t.source_label}</label>
                   <input value={editData.source}
                     onChange={(e) => setEditData((d) => ({ ...d, source: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400">Date</label>
+                  <label className="text-xs text-gray-400">{t.date_label}</label>
                   <DateInput value={editData.date ?? ''}
                     onChange={(e) => setEditData((d) => ({ ...d, date: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400">Status</label>
+                  <label className="text-xs text-gray-400">{t.status_label}</label>
                   <select value={editData.status}
                     onChange={(e) => setEditData((d) => ({ ...d, status: e.target.value as Income['status'] }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
@@ -129,8 +129,8 @@ export function IncomePage() {
                 </div>
               </div>
               <div className="flex gap-2 mt-3">
-                <button onClick={saveEdit} className="flex items-center gap-1 bg-calm-green text-white px-3 py-1.5 rounded-lg text-sm"><Check size={14} /> Save</button>
-                <button onClick={() => setEditId(null)} className="flex items-center gap-1 border border-beige-200 px-3 py-1.5 rounded-lg text-sm text-gray-500"><X size={14} /> Cancel</button>
+                <button onClick={saveEdit} className="flex items-center gap-1 bg-calm-green text-white px-3 py-1.5 rounded-lg text-sm"><Check size={14} /> {t.save}</button>
+                <button onClick={() => setEditId(null)} className="flex items-center gap-1 border border-beige-200 px-3 py-1.5 rounded-lg text-sm text-gray-500"><X size={14} /> {t.cancel_edit}</button>
               </div>
             </Card>
           ) : (

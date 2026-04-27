@@ -29,7 +29,7 @@ export function AddIncome() {
   const submit = () => {
     if (!form.amount || form.amount <= 0) { setError(t.amount_error); return; }
 
-    if (recurring && months > 1) {
+    if (recurring && months >= 1) {
       const groupId = uid();
       for (let i = 0; i < months; i++) {
         const date = format(addMonths(new Date(form.date), i), 'yyyy-MM-dd');
