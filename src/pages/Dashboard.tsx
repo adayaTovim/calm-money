@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Wallet, Clock, Plus, Upload, Scale } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Clock, Plus, Upload, Scale, Download } from 'lucide-react';
+import { exportToExcel } from '../utils/excel';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
 import { generateInsights, calcHealthScore } from '../utils/insights';
@@ -71,12 +72,19 @@ export function Dashboard() {
           <h1 className="text-xl md:text-2xl font-bold text-gray-800">{t.dashboard}</h1>
           <p className="text-gray-400 text-sm mt-0.5">{t.dashboard_sub}</p>
         </div>
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm flex-wrap">
           <input type="date" value={dateFrom} onChange={(e) => setDateRange(e.target.value, dateTo)}
             className="flex-1 sm:flex-none border border-beige-200 rounded-lg px-2 py-1.5 bg-white text-gray-600 text-xs md:text-sm" />
           <span className="text-gray-400">→</span>
           <input type="date" value={dateTo} onChange={(e) => setDateRange(dateFrom, e.target.value)}
             className="flex-1 sm:flex-none border border-beige-200 rounded-lg px-2 py-1.5 bg-white text-gray-600 text-xs md:text-sm" />
+          {hasData && (
+            <button
+              onClick={() => exportToExcel({ incomes, expenses, dateFrom, dateTo })}
+              className="flex items-center gap-1.5 border border-beige-200 bg-white px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-beige-50 transition-colors shrink-0">
+              <Download size={13} /> {t.export_btn}
+            </button>
+          )}
         </div>
       </div>
 

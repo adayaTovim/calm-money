@@ -133,6 +133,128 @@ export function parseExcelFile(file: File): Promise<ParsedExcelData> {
   });
 }
 
+// ─── EXPORT ────────────────────────────────────────────────────────────────
+
+interface ExportData {
+  incomes: Income[];
+  expenses: Expense[];
+  dateFrom: string;
+  dateTo: string;
+}
+
+function setColWidths(ws: XLSX.WorkSheet, widths: number[]) {
+  ws['!cols'] = widths.map((w) => ({ wch: w }));
+}
+
+export function exportToExcel(data: ExportData) {
+  const { incomes, expenses, dateFrom, dateTo } = data;
+  const wb = XLSX.utils.book_new();
+  const period = `${dateFrom} → ${dateTo}`;
+
+  // ── 1. Summary sheet ──────────────────────────────────────────────────────
+  const totalIncome = incomes.filter((i) => i.status === 'received').reduce((s, i) => s + i.amount, 0);
+  const totalPending = incomes.filter((i) => i.status === 'pending').reduce((s, i) => s + i.amount, 0);
+  const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+  const freeMoney = totalIncome - totalExpenses;
+  const freeMoneyPct = totalIncome > 0 ? Math.round((freeMoney / totalIncome) * 100) : 0;
+  const healthScore = (() => {
+    if (totalIncome === 0 && totalExpenses === 0) return 0;
+    let score = 100;
+    const pct = totalIncome > 0 ? freeMoney / totalIncome : -1;
+    if (freeMoney < 0) score -= 40;
+    else if (pct < 0.1) score -= 20;
+    else if (pct < 0.2) score -= 10;
+    const pendingPct = (totalIncome + totalPending) > 0 ? totalPending / (totalIncome + totalPending) : 0;
+    if (pendingPct > 0.5) score -= 20;
+    else if (pendingPct > 0.3) score -= 10;
+    return Math.max(0, Math.min(100, score));
+  })();
+
+  const summaryRows = [
+    ['Calm Money — Financial Report'],
+    [`Period: ${period}`],
+    [],
+    ['Metric', 'Value'],
+    ['Total Income (received)', totalIncome],
+    ['Pending Income', totalPending],
+    ['Total Expenses', totalExpenses],
+    ['Balance', totalIncome - totalExpenses],
+    ['Free Money', freeMoney],
+    ['Free Money %', `${freeMoneyPct}%`],
+    ['Financial Health Score', `${healthScore} / 100`],
+  ];
+  const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+  setColWidths(wsSummary, [30, 20]);
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+  // ── 2. Income sheet ────────────────────────────────────────────────────────
+  const incomeRows = [
+    ['Amount (₪)', 'Source', 'Date', 'Status'],
+    ...incomes.map((i) => [i.amount, i.source, i.date, i.status]),
+    [],
+    ['Total Received', totalIncome],
+    ['Total Pending', totalPending],
+  ];
+  const wsIncome = XLSX.utils.aoa_to_sheet(incomeRows);
+  setColWidths(wsIncome, [14, 30, 14, 12]);
+  XLSX.utils.book_append_sheet(wb, wsIncome, 'Income');
+
+  // ── 3. Expenses sheet ─────────────────────────────────────────────────────
+  const expenseRows = [
+    ['Amount (₪)', 'Category', 'Supplier', 'Date', 'Status'],
+    ...expenses.map((e) => [e.amount, e.category, e.supplier ?? '', e.date, e.status ?? 'paid']),
+    [],
+    ['Total', totalExpenses],
+  ];
+  const wsExpenses = XLSX.utils.aoa_to_sheet(expenseRows);
+  setColWidths(wsExpenses, [14, 16, 28, 14, 12]);
+  XLSX.utils.book_append_sheet(wb, wsExpenses, 'Expenses');
+
+  // ── 4. Category breakdown ─────────────────────────────────────────────────
+  const catMap: Record<string, number> = {};
+  expenses.forEach((e) => { catMap[e.category] = (catMap[e.category] || 0) + e.amount; });
+  const catRows = [
+    ['Category', 'Amount (₪)', '% of Expenses'],
+    ...Object.entries(catMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([cat, amt]) => [cat, amt, totalExpenses > 0 ? `${Math.round((amt / totalExpenses) * 100)}%` : '0%']),
+  ];
+  const wsCat = XLSX.utils.aoa_to_sheet(catRows);
+  setColWidths(wsCat, [20, 16, 18]);
+  XLSX.utils.book_append_sheet(wb, wsCat, 'By Category');
+
+  // ── 5. Monthly breakdown ──────────────────────────────────────────────────
+  const monthMap: Record<string, { income: number; expenses: number }> = {};
+  incomes.filter((i) => i.status === 'received').forEach((i) => {
+    const m = i.date.slice(0, 7);
+    if (!monthMap[m]) monthMap[m] = { income: 0, expenses: 0 };
+    monthMap[m].income += i.amount;
+  });
+  expenses.forEach((e) => {
+    const m = e.date.slice(0, 7);
+    if (!monthMap[m]) monthMap[m] = { income: 0, expenses: 0 };
+    monthMap[m].expenses += e.amount;
+  });
+  const monthRows = [
+    ['Month', 'Income (₪)', 'Expenses (₪)', 'Free Money (₪)', 'Free Money %'],
+    ...Object.entries(monthMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, { income, expenses: exp }]) => {
+        const free = income - exp;
+        const pct = income > 0 ? `${Math.round((free / income) * 100)}%` : '—';
+        return [month, income, exp, free, pct];
+      }),
+  ];
+  const wsMonthly = XLSX.utils.aoa_to_sheet(monthRows);
+  setColWidths(wsMonthly, [12, 14, 16, 16, 14]);
+  XLSX.utils.book_append_sheet(wb, wsMonthly, 'By Month');
+
+  const filename = `calm-money-report-${dateFrom}-${dateTo}.xlsx`;
+  XLSX.writeFile(wb, filename);
+}
+
+// ─── TEMPLATE ───────────────────────────────────────────────────────────────
+
 // Generate a template Excel file for download
 export function downloadTemplate() {
   const wb = XLSX.utils.book_new();
