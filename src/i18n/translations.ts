@@ -13,9 +13,9 @@ const translations = {
     tagline: 'Your finances, calmly.',
     more: 'More',
     nav_style: 'Navigation style',
-    nav_icons: 'A · Icons only',
-    nav_pill: 'B · Floating pill',
-    nav_labels: 'C · Classic tabs',
+    nav_labels: 'A · Classic tabs',
+    nav_icons: 'B · Icons only',
+    nav_pill: 'C · Floating pill',
 
     // Onboarding
     onboarding_title: 'Calm Money',
@@ -269,9 +269,9 @@ const translations = {
     tagline: 'הכספים שלך, ברוגע.',
     more: 'עוד',
     nav_style: 'סגנון ניווט',
-    nav_icons: 'A · אייקונים בלבד',
-    nav_pill: 'B · כפתור צף',
-    nav_labels: 'C · כרטיסיות קלאסיות',
+    nav_labels: 'A · כרטיסיות קלאסיות',
+    nav_icons: 'B · אייקונים בלבד',
+    nav_pill: 'C · כפתור צף',
 
     // Onboarding
     onboarding_title: 'כסף רגוע',

@@ -99,7 +99,7 @@ export function SettingsPage() {
       <Card className="md:hidden">
         <h2 className="font-semibold text-gray-700 mb-3">{t.nav_style}</h2>
         <div className="flex flex-col gap-2">
-          {(['icons', 'pill', 'labels'] as const).map((style) => (
+          {(['labels', 'icons', 'pill'] as const).map((style) => (
             <button key={style} onClick={() => setNavStyle(style)}
               className={`w-full py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                 navStyle === style
