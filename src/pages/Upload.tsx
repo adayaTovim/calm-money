@@ -7,8 +7,7 @@ import { parseExcelFile, downloadTemplate } from '../utils/excel';
 import type { ParsedExcelData } from '../utils/excel';
 import type { Income, Expense } from '../types';
 import { useT } from '../i18n/useT';
-
-const CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment', 'Travel', 'Utilities', 'Taxes', 'Other'];
+import { CATEGORY_KEYS, getCategoryLabel } from '../utils/categories';
 
 export function UploadPage() {
   const navigate = useNavigate();
@@ -237,7 +236,7 @@ export function UploadPage() {
                             <select value={exp.category}
                               onChange={(e) => setEditedExpenses((arr) => arr.map((x, j) => j === i ? { ...x, category: e.target.value } : x))}
                               className="border border-beige-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-calm-blue/30">
-                              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                              {CATEGORY_KEYS.map((c) => <option key={c} value={c}>{getCategoryLabel(c, t)}</option>)}
                             </select>
                           </td>
                           <td className="py-2 pe-2">

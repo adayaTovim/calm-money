@@ -8,10 +8,9 @@ import { FilterBar, getDateRange } from '../components/ui/FilterBar';
 import type { TimePreset } from '../components/ui/FilterBar';
 import type { Expense } from '../types';
 import { useT } from '../i18n/useT';
+import { CATEGORY_KEYS, getCategoryLabel } from '../utils/categories';
 
 function fmt(n: number) { return '₪' + n.toLocaleString('he-IL', { maximumFractionDigits: 0 }); }
-
-const EDIT_CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment', 'Travel', 'Utilities', 'Taxes', 'Other'];
 
 
 export function ExpensesPage() {
@@ -120,7 +119,7 @@ export function ExpensesPage() {
                   <select value={editData.category}
                     onChange={(e) => setEditData((d) => ({ ...d, category: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1">
-                    {EDIT_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                    {CATEGORY_KEYS.map((c) => <option key={c} value={c}>{getCategoryLabel(c, t)}</option>)}
                   </select>
                 </div>
                 <div>

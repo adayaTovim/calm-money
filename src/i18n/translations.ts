@@ -92,6 +92,17 @@ const translations = {
     custom: '+ Custom',
     category_placeholder: 'Category name',
 
+    // Expense categories
+    cat_rent: 'Rent',
+    cat_salaries: 'Salaries',
+    cat_marketing: 'Marketing',
+    cat_software: 'Software',
+    cat_equipment: 'Equipment',
+    cat_travel: 'Travel',
+    cat_utilities: 'Utilities',
+    cat_taxes: 'Taxes',
+    cat_other: 'Other',
+
     // Recurring
     recurring_label: 'Recurring',
     recurring_desc: 'Repeat this entry for the next months',
@@ -336,6 +347,17 @@ const translations = {
     add_expense_btn: 'הוסף הוצאה',
     custom: '+ מותאם אישית',
     category_placeholder: 'שם קטגוריה',
+
+    // Expense categories
+    cat_rent: 'שכירות',
+    cat_salaries: 'שכר',
+    cat_marketing: 'שיווק',
+    cat_software: 'תוכנה',
+    cat_equipment: 'ציוד',
+    cat_travel: 'נסיעות',
+    cat_utilities: 'חשמל ומים',
+    cat_taxes: 'מסים',
+    cat_other: 'אחר',
 
     // Recurring
     recurring_label: 'חוזר',

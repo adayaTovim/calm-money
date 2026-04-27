@@ -6,8 +6,7 @@ import { Card } from '../components/ui/Card';
 import { useT } from '../i18n/useT';
 import type { Expense } from '../types';
 import { addMonths, format } from 'date-fns';
-
-const CATEGORIES = ['Rent', 'Salaries', 'Marketing', 'Software', 'Equipment', 'Travel', 'Utilities', 'Taxes', 'Other'];
+import { CATEGORY_KEYS, getCategoryLabel } from '../utils/categories';
 
 const EMPTY: Omit<Expense, 'id'> = {
   amount: 0, category: 'Other', supplier: '', date: new Date().toISOString().slice(0, 10), status: 'paid', notes: '',
@@ -66,12 +65,12 @@ export function AddExpense() {
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-1">{t.category_label} *</label>
           <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((c) => (
+            {CATEGORY_KEYS.map((c) => (
               <button key={c} onClick={() => set('category', c)}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                   form.category === c ? 'bg-calm-blue-light border-calm-blue text-calm-blue' : 'border-beige-200 text-gray-400 hover:bg-beige-50'
                 }`}>
-                {c}
+                {getCategoryLabel(c, t)}
               </button>
             ))}
             <button onClick={() => set('category', '__custom__')}
