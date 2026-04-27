@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
+import { DateInput } from '../components/ui/DateInput';
 import { Badge } from '../components/ui/Badge';
 import { FilterBar, getDateRange } from '../components/ui/FilterBar';
 import type { TimePreset } from '../components/ui/FilterBar';
@@ -130,7 +131,7 @@ export function ExpensesPage() {
                 </div>
                 <div>
                   <label className="text-xs text-gray-400">Date</label>
-                  <input type="date" value={editData.date}
+                  <DateInput value={editData.date ?? ''}
                     onChange={(e) => setEditData((d) => ({ ...d, date: e.target.value }))}
                     className="w-full border border-beige-200 rounded-lg px-3 py-1.5 text-sm mt-1" />
                 </div>

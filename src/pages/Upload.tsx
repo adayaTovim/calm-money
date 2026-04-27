@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Upload, FileSpreadsheet, Check, AlertCircle, ArrowLeft, Download, RefreshCw } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
+import { DateInput } from '../components/ui/DateInput';
 import { parseExcelFile, downloadTemplate } from '../utils/excel';
 import type { ParsedExcelData } from '../utils/excel';
 import type { Income, Expense } from '../types';
@@ -181,7 +182,7 @@ export function UploadPage() {
                               className="w-full min-w-[120px] border border-beige-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-calm-blue/30" />
                           </td>
                           <td className="py-2 pe-2">
-                            <input type="date" value={inc.date}
+                            <DateInput value={inc.date}
                               onChange={(e) => setEditedIncomes((arr) => arr.map((x, j) => j === i ? { ...x, date: e.target.value } : x))}
                               className="border border-beige-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-calm-blue/30" />
                           </td>
@@ -245,7 +246,7 @@ export function UploadPage() {
                               className="w-full min-w-[100px] border border-beige-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-calm-blue/30" />
                           </td>
                           <td className="py-2 pe-2">
-                            <input type="date" value={exp.date}
+                            <DateInput value={exp.date}
                               onChange={(e) => setEditedExpenses((arr) => arr.map((x, j) => j === i ? { ...x, date: e.target.value } : x))}
                               className="border border-beige-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-calm-blue/30" />
                           </td>

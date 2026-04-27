@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Check } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Card } from '../components/ui/Card';
+import { DateInput } from '../components/ui/DateInput';
 import { useT } from '../i18n/useT';
 import type { Income } from '../types';
 import { addMonths, format } from 'date-fns';
@@ -69,7 +70,7 @@ export function AddIncome() {
 
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-1">{t.date_label}</label>
-          <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)}
+          <DateInput value={form.date} onChange={(e) => set('date', e.target.value)}
             className="w-full border border-beige-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-calm-blue/30" />
         </div>
 

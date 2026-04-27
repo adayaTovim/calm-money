@@ -20,6 +20,7 @@ function fmt(n: number) {
 export function Dashboard() {
   const navigate = useNavigate();
   const t = useT();
+  const language = useStore((s) => s.language);
   const {
     filteredIncomes, filteredExpenses, totalIncome, totalExpenses,
     freeMoney, pendingIncome, dateFrom, dateTo, setDateRange,
@@ -73,10 +74,10 @@ export function Dashboard() {
           <p className="text-gray-400 text-sm mt-0.5">{t.dashboard_sub}</p>
         </div>
         <div className="flex items-center gap-2 text-sm flex-wrap">
-          <input type="date" value={dateFrom} onChange={(e) => setDateRange(e.target.value, dateTo)}
+          <input type="date" lang={language} value={dateFrom} onChange={(e) => setDateRange(e.target.value, dateTo)}
             className="flex-1 sm:flex-none border border-beige-200 rounded-lg px-2 py-1.5 bg-white text-gray-600 text-xs md:text-sm" />
           <span className="text-gray-400">→</span>
-          <input type="date" value={dateTo} onChange={(e) => setDateRange(dateFrom, e.target.value)}
+          <input type="date" lang={language} value={dateTo} onChange={(e) => setDateRange(dateFrom, e.target.value)}
             className="flex-1 sm:flex-none border border-beige-200 rounded-lg px-2 py-1.5 bg-white text-gray-600 text-xs md:text-sm" />
           {hasData && (
             <button
