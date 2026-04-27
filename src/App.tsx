@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useStore } from './store/useStore';
 import { Layout } from './components/layout/Layout';
 import { Onboarding } from './pages/Onboarding';
@@ -41,6 +42,13 @@ function AppRoutes() {
 
 export default function App() {
   const language = useStore((s) => s.language);
+
+  // Set lang and dir on <html> so Safari iOS uses the correct locale for date pickers
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
+  }, [language]);
+
   return (
     <div lang={language} dir={language === 'he' ? 'rtl' : 'ltr'} className="min-h-screen">
       <BrowserRouter>
